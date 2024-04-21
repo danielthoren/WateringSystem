@@ -5,6 +5,7 @@
 constexpr float moistureRawMax = 1023.00;
 constexpr float moistureRawMin = 0.0;
 constexpr uint8_t errorPin = 12;
+constexpr uint8_t wateringTime = 2;
 constexpr unsigned moistureThreshold = 40;
 
 constexpr float idleWaittimeMs = 1000; //MsFromMin(1); // how long to wait between checking moisture level when idle
@@ -21,7 +22,7 @@ ResistiveMoistureSensor sensor1{
     moistureRawMax,
     moistureThreshold};
 
-FlowerPot pot1{sensor1, motor1Pin, errorPin, moistureThreshold, 0};
+FlowerPot pot1{sensor1, motor1Pin, errorPin, wateringTime, moistureThreshold};
 
 constexpr uint8_t sensor2DataPin = A1;
 constexpr uint8_t sensor2PowerPin = 10;
@@ -34,7 +35,7 @@ ResistiveMoistureSensor sensor2{
     moistureRawMax,
     moistureThreshold};
 
-FlowerPot pot2{sensor2, motor2Pin, errorPin, moistureThreshold, 0};
+FlowerPot pot2{sensor2, motor2Pin, errorPin, wateringTime, moistureThreshold};
 
 void setup()
 {
@@ -45,14 +46,6 @@ void loop()
 {
   pot1.update();
   pot2.update();
-  if (pot1.isIdle() && pot2.isIdle())
-  {
-    delay(idleWaittimeMs);
-  }
-  else
-  {
-    delay(activeWaittimeMs);
-  }
 }
 
 void Calibration(int analolgReadPin) {
