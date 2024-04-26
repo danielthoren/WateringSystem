@@ -4,6 +4,8 @@
 
 #include "Filter.hpp"
 
+#include "CommonUtil.hpp"
+
 class ISensor
 {
 public:
@@ -12,11 +14,26 @@ public:
 
   virtual bool isTriggered() = 0;
   virtual void sample() = 0;
+
+  bool isInitialized() { return m_initialized; }
+
+protected:
+  bool m_initialized{false};
 };
 
 class ResistiveMoistureSensor : public ISensor
 {
 public:
+  ResistiveMoistureSensor() :
+    m_dataPin{},
+    m_powerPin{},
+    m_minSensorRange{},
+    m_maxSensorRange{},
+    m_triggerThresholdPercent{},
+    m_invertTrigger{},
+    m_filter{}
+  {}
+
   ResistiveMoistureSensor(uint8_t dataPin,
                           uint8_t powerPin,
                           unsigned minSensorRange,
@@ -32,12 +49,24 @@ public:
     m_invertTrigger{invertTrigger},
     m_filter{filterAlpha}
   {
+    ASSERT(minSensorRange != maxSensorRange, "The lower and upper sensor range must not be equal");
+    ASSERT(triggerThresholdPercent < 100, "The trigger threshold cannot be larger than, or equal to, 100%");
+
     pinMode(m_powerPin, OUTPUT);
     digitalWrite(m_powerPin, LOW);
+
+    // If sensor disconnected, pullup ensures that it registers full
+    // moisture to avoid motor activating
+    pinMode(m_dataPin, INPUT_PULLUP);
+
+    m_initialized = true;
   }
 
   void sample() override
   {
+    if (!isInitialized())
+      return;
+
     // Power on sensor
     digitalWrite(m_powerPin, HIGH);
     // Allow power to settle
@@ -50,8 +79,16 @@ public:
 
   bool isTriggered() override
   {
+    if (!isInitialized())
+      return false;
+
     unsigned sensorValue = getPercentageValue();
+
+    Serial.print("Sensor ");
+    Serial.print(m_dataPin);
+    Serial.print(": ");
     Serial.println(sensorValue);
+
     if (m_invertTrigger)
       return sensorValue >= m_triggerThresholdPercent;
     else
@@ -66,13 +103,13 @@ private:
     return 100 - ((static_cast<float>(m_filter.getValue()) / sensorRange) * 100);
   }
 
-  uint8_t const m_dataPin;
-  uint8_t const m_powerPin;
-  unsigned const m_minSensorRange;
-  unsigned const m_maxSensorRange;
-  uint8_t const m_triggerThresholdPercent;
-  bool const m_invertTrigger;
-  LowPassFilter<unsigned> const m_filter;
+  uint8_t m_dataPin;
+  uint8_t m_powerPin;
+  unsigned m_minSensorRange;
+  unsigned m_maxSensorRange;
+  uint8_t m_triggerThresholdPercent;
+  bool m_invertTrigger;
+  LowPassFilter<unsigned> m_filter;
 };
 
 #endif

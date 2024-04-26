@@ -33,22 +33,33 @@ public:
     MIN_WATER_INTERVAL_ERROR
   };
 
-  FlowerPot(ISensor const& sensor,
+  FlowerPot() :
+    m_pSensor{nullptr},
+    m_motorPin{},
+    m_errorLedPin{},
+    m_wateringTimeMs{},
+    m_waitTimeAfterWateringMs{}
+  {}
+
+  FlowerPot(ISensor* pSensor,
             uint8_t motorPin,
             uint8_t errorLedPin,
             uint8_t wateringTime_sek,
-            uint8_t moistureThreshold = 40,
-            uint8_t waitTimeAfterWatering_min = 10)
-    : m_sensor{sensor},
-      m_motorPin{motorPin},
-      m_errorLedPin{errorLedPin},
-      m_wateringTimeMs{msFromSec(wateringTime_sek)},
-      m_moistureThreshold{moistureThreshold},
-      m_waitTimeAfterWateringMs{msFromMin(waitTimeAfterWatering_min)}
+            uint8_t waitTimeAfterWatering_min = 10) :
+    m_pSensor{pSensor},
+    m_motorPin{motorPin},
+    m_errorLedPin{errorLedPin},
+    m_wateringTimeMs{msFromSec(wateringTime_sek)},
+    m_waitTimeAfterWateringMs{msFromMin(waitTimeAfterWatering_min)}
   {
+    ASSERT(pSensor != nullptr, "pSensor may not be null");
+    ASSERT(wateringTime_sek != 0, "Watering time may not be 0");
+
     pinMode(m_motorPin, OUTPUT);
     pinMode(m_errorLedPin, OUTPUT);
     digitalWrite(m_errorLedPin, LOW);
+
+    m_initialized = true;
   }
 
   bool isIdle()
@@ -59,8 +70,16 @@ public:
       m_state == State::MIN_WATER_INTERVAL_ERROR;
   }
 
+  bool isInitialized()
+  {
+    return m_initialized;
+  }
+
   State update()
   {
+    if (!isInitialized())
+      return State::IDLE;
+
     // Limit speed of updates
     if (isIdle() && millis() - m_lastUpdateTimeMs < m_idleWaittimeMs) {
       return m_state;
@@ -88,8 +107,8 @@ private:
 
   State IdleState()
   {
-    m_sensor.sample();
-    if (m_sensor.isTriggered())
+    m_pSensor->sample();
+    if (m_pSensor->isTriggered())
     {
       if (m_lastWaterTimeMs != 0 && millis() - m_lastWaterTimeMs < m_minWaterInterval)
       {
@@ -111,11 +130,11 @@ private:
 
   State WateringState()
   {
-    m_sensor.sample();
-    if (m_sensor.isTriggered() == false ||
+    m_pSensor->sample();
+    if (m_pSensor->isTriggered() == false ||
         (millis() - m_motorStartTimeMs > m_wateringTimeMs))
     {
-      if (m_sensor.isTriggered() == false) {
+      if (m_pSensor->isTriggered() == false) {
         Serial.println("Moisture threshold reached, transition to state 'WAITING'");
       } else {
         Serial.println("Watering timeout reached, transition to state 'WAITING'");
@@ -131,11 +150,6 @@ private:
 
   State waitingState()
   {
-    // Serial.print("time since watering: ");
-    // Serial.print(millis() - m_lastWaterTimeMs);
-    // Serial.print(" waitTime: ");
-    // Serial.println(m_waitTimeAfterWateringMs);
-
     if (millis() - m_lastWaterTimeMs > m_waitTimeAfterWateringMs)
     {
       Serial.println("Waiting done, transition to state 'IDLE'");
@@ -144,18 +158,19 @@ private:
       return State::WAITING;
   }
 
-  ISensor const& m_sensor;
-  uint8_t const m_motorPin;
-  uint8_t const m_errorLedPin;
-  unsigned long const m_wateringTimeMs;
-  uint8_t const m_moistureThreshold;
-  uint32_t const m_waitTimeAfterWateringMs{};
+  ISensor* m_pSensor;
+  uint8_t m_motorPin;
+  uint8_t m_errorLedPin;
+  unsigned long m_wateringTimeMs;
+  uint32_t m_waitTimeAfterWateringMs{};
 
   unsigned long m_lastWaterTimeMs{0};
   unsigned long m_motorStartTimeMs{0};
   unsigned long m_lastUpdateTimeMs{0};
 
   State m_state{State::IDLE};
+
+  bool m_initialized{false};
 };
 
 #endif

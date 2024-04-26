@@ -2,54 +2,52 @@
 #include "FlowerPot.hpp"
 #include "Sensor.hpp"
 
+constexpr size_t hwSupportedPotNum = 6;
+
+constexpr uint8_t errorPin = 12;
+constexpr size_t numPots = 6;
+
+// Sensors
 constexpr float moistureRawMax = 1023.00;
 constexpr float moistureRawMin = 0.0;
-constexpr uint8_t errorPin = 12;
-constexpr uint8_t wateringTime = 2;
+constexpr uint8_t sensorPowerPin = 13;
 constexpr unsigned moistureThreshold = 40;
 
-constexpr float idleWaittimeMs = 1000; //MsFromMin(1); // how long to wait between checking moisture level when idle
-constexpr float activeWaittimeMs = 100; // how long to wait between updates when active
+ResistiveMoistureSensor sensors[numPots];
 
-constexpr uint8_t sensor1DataPin = A0;
-constexpr uint8_t sensor1PowerPin = 11;
-constexpr uint8_t motor1Pin = 3;
+// Flower pots
+constexpr uint8_t wateringTime = 2;
 
-ResistiveMoistureSensor sensor1{
-    sensor1DataPin,
-    sensor1PowerPin,
-    moistureRawMin,
-    moistureRawMax,
-    moistureThreshold};
-
-FlowerPot pot1{sensor1, motor1Pin, errorPin, wateringTime, moistureThreshold};
-
-constexpr uint8_t sensor2DataPin = A1;
-constexpr uint8_t sensor2PowerPin = 10;
-constexpr uint8_t motor2Pin = 4;
-
-ResistiveMoistureSensor sensor2{
-    sensor2DataPin,
-    sensor2PowerPin,
-    moistureRawMin,
-    moistureRawMax,
-    moistureThreshold};
-
-FlowerPot pot2{sensor2, motor2Pin, errorPin, wateringTime, moistureThreshold};
+FlowerPot pots[numPots];
 
 void setup()
 {
+  ASSERT(numPots <= hwSupportedPotNum, "HW supported pot number exceeded");
   Serial.begin(9600);
+
+  for (size_t i{0}; i < numPots; ++i)
+  {
+    sensors[i] = {
+      .dataPin = 5 - i, // Sensor 1 on pin 5, sensor 2 on pin 4, etc
+      .powerPin = sensorPowerPin,
+      .minSensorRange = moistureRawMin,
+      .maxSensorRange = moistureRawMax,
+      .triggerThresholdPercent = moistureThreshold
+    };
+
+    pots[i] = {
+      &sensors[i],
+      7 + i, // Motor 1 on pin 7, motor 2 on pin 8, etc
+      errorPin,
+      wateringTime
+    };
+  }
 }
 
 void loop()
 {
-  pot1.update();
-  pot2.update();
-}
-
-void Calibration(int analolgReadPin) {
-  int moistureVal = analogRead(analolgReadPin);  // read the input on analog pin 0:
-  Serial.println(moistureVal); // print out the analog val
-  delay(100);
+  for (size_t i{0}; i < numPots; ++i)
+  {
+    pots[i].update();
+  }
 }
