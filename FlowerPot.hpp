@@ -131,8 +131,7 @@ private:
   State WateringState()
   {
     m_pSensor->sample();
-    if (m_pSensor->isTriggered() == false ||
-        (millis() - m_motorStartTimeMs > m_wateringTimeMs))
+    if (millis() - m_motorStartTimeMs > m_wateringTimeMs)
     {
       if (m_pSensor->isTriggered() == false) {
         Serial.println("Moisture threshold reached, transition to state 'WAITING'");
