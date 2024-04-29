@@ -88,6 +88,7 @@ public:
     }
     m_lastUpdateTimeMs = millis();
 
+    m_pSensor->sample();
     switch (m_state)
     {
       case State::IDLE:
@@ -107,7 +108,6 @@ private:
 
   State IdleState()
   {
-    m_pSensor->sample();
     if (m_pSensor->isTriggered())
     {
       if (m_lastWaterTimeMs != 0 && millis() - m_lastWaterTimeMs < m_minWaterInterval)
@@ -130,7 +130,6 @@ private:
 
   State WateringState()
   {
-    m_pSensor->sample();
     if (millis() - m_motorStartTimeMs > m_wateringTimeMs)
     {
       if (m_pSensor->isTriggered() == false) {
