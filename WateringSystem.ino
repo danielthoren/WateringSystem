@@ -5,7 +5,7 @@
 constexpr size_t hwSupportedPotNum = 6;
 
 constexpr uint8_t errorPin = 12;
-constexpr size_t numPots = 6;
+constexpr size_t numPots = 2;
 
 // Sensors
 constexpr float moistureRawMax = 1023.00;
@@ -13,11 +13,12 @@ constexpr float moistureRawMin = 0.0;
 constexpr uint8_t sensorPowerPin = 13;
 constexpr unsigned moistureThreshold = 40;
 
+constexpr uint8_t sensorPins[] = {A7, A6, A3, A2, A1, A0};
 ResistiveMoistureSensor sensors[numPots];
 
 // Flower pots
 constexpr uint8_t wateringTime = 2;
-
+constexpr uint8_t motorPins[] = {7, 8, 9, 10, 11, 12};
 FlowerPot pots[numPots];
 
 void setup()
@@ -28,7 +29,7 @@ void setup()
   for (size_t i{0}; i < numPots; ++i)
   {
     sensors[i] = {
-      .dataPin = 5 - i, // Sensor 1 on pin 5, sensor 2 on pin 4, etc
+      .dataPin = sensorPins[i],
       .powerPin = sensorPowerPin,
       .minSensorRange = moistureRawMin,
       .maxSensorRange = moistureRawMax,
