@@ -70,7 +70,7 @@ public:
     // Power on sensor
     digitalWrite(m_powerPin, HIGH);
     // Allow power to settle
-    delay(10);
+    delay(50);
     m_filter.filter(analogRead(m_dataPin));
 
     // Power off sensor
@@ -84,24 +84,19 @@ public:
 
     unsigned sensorValue = getPercentageValue();
 
-    Serial.print("Sensor ");
-    Serial.print(m_dataPin);
-    Serial.print(": ");
-    Serial.println(sensorValue);
-
     if (m_invertTrigger)
       return sensorValue >= m_triggerThresholdPercent;
     else
       return sensorValue < m_triggerThresholdPercent;
   }
 
-private:
-
   unsigned getPercentageValue()
   {
     float sensorRange = m_maxSensorRange - m_minSensorRange;
     return 100 - ((static_cast<float>(m_filter.getValue()) / sensorRange) * 100);
   }
+
+private:
 
   uint8_t m_dataPin;
   uint8_t m_powerPin;

@@ -5,7 +5,7 @@
 constexpr size_t hwSupportedPotNum = 6;
 
 constexpr uint8_t errorPin = 12;
-constexpr size_t numPots = 2;
+constexpr size_t numPots = 4;
 
 // Sensors
 constexpr float moistureRawMax = 1023.00;
@@ -35,20 +35,56 @@ void setup()
       .maxSensorRange = moistureRawMax,
       .triggerThresholdPercent = moistureThreshold
     };
-
-    pots[i] = {
-      &sensors[i],
-      7 + i, // Motor 1 on pin 7, motor 2 on pin 8, etc
-      errorPin,
-      wateringTime
-    };
   }
+
+  pots[0] = {
+    &sensors[0],
+    motorPins[0],
+    errorPin,
+    2
+    };
+
+  pots[1] = {
+    &sensors[1],
+    motorPins[1],
+    errorPin,
+    2
+    };
+
+  pots[2] = {
+    &sensors[2],
+    motorPins[2],
+    errorPin,
+    2
+    };
+
+  pots[3] = {
+    &sensors[3],
+    motorPins[3],
+    errorPin,
+    3
+    };
 }
+
+constexpr unsigned long sensorPrintTimeout = FlowerPot::m_idleWaittimeMs;
+unsigned long lastSensorPrintTime = millis();
 
 void loop()
 {
   for (size_t i{0}; i < numPots; ++i)
   {
     pots[i].update();
+
+    if (millis() - lastSensorPrintTime > sensorPrintTimeout)
+    {
+      lastSensorPrintTime = millis();
+
+      for (size_t i{0}; i < numPots; ++i)
+      {
+        Serial.print(sensors[i].getPercentageValue());
+        Serial.print("  ");
+      }
+      Serial.println("");
+    }
   }
 }
