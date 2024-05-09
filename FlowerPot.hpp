@@ -113,12 +113,12 @@ private:
       if (m_lastWaterTimeMs != 0 && millis() - m_lastWaterTimeMs < m_minWaterInterval)
       {
         Serial.print(m_motorPin);
-        Serial.println(": Moisture sensor triggered earlier than the expected minimum time between watering, assuming failure...");
+        Serial.println(F(": Moisture sensor triggered earlier than the expected minimum time between watering, assuming failure..."));
         digitalWrite(m_errorLedPin, HIGH);
         return State::MIN_WATER_INTERVAL_ERROR;
       }
       Serial.print(m_motorPin);
-      Serial.println(": Start watering, transition to state 'WATERING'");
+      Serial.println(F(": Start watering, transition to state 'WATERING'"));
 
       // Start watering before going to watering state
       digitalWrite(m_motorPin, HIGH); // turn on the motor
@@ -136,10 +136,10 @@ private:
     {
       if (m_pSensor->isTriggered() == false) {
         Serial.print(m_motorPin);
-        Serial.println(": Moisture threshold reached, transition to state 'WAITING'");
+        Serial.println(F(": Moisture threshold reached, transition to state 'WAITING'"));
       } else {
         Serial.print(m_motorPin);
-        Serial.println(": Watering timeout reached, transition to state 'WAITING'");
+        Serial.println(F(": Watering timeout reached, transition to state 'WAITING'"));
       }
 
       digitalWrite(m_motorPin, LOW);  // turn off the motor
@@ -155,7 +155,7 @@ private:
     if (millis() - m_lastWaterTimeMs > m_waitTimeAfterWateringMs)
     {
       Serial.print(m_motorPin);
-      Serial.println(": Waiting done, transition to state 'IDLE'");
+      Serial.println(F(": Waiting done, transition to state 'IDLE'"));
       return State::IDLE;
     }
       return State::WAITING;
