@@ -9,8 +9,8 @@ constexpr uint32_t msFromMin(uint32_t const min) { return min * 60 * 1000; }
   {                                             \
     if (!(cond))                                \
     {                                           \
-      Serial.print("ASSERT: ");                 \
-      Serial.println(text);                     \
+      Serial.print(F("ASSERT: "));              \
+      Serial.println(F(text));                  \
       while (true) {};                          \
     }                                           \
   } while (0)

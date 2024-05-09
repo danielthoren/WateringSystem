@@ -3,7 +3,6 @@
 #define SENSOR
 
 #include "Filter.hpp"
-
 #include "CommonUtil.hpp"
 
 class ISensor

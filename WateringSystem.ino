@@ -1,11 +1,10 @@
-
 #include "FlowerPot.hpp"
 #include "Sensor.hpp"
 
 constexpr size_t hwSupportedPotNum = 6;
 
 constexpr uint8_t errorPin = 12;
-constexpr size_t numPots = 4;
+constexpr size_t numPots = 6;
 
 // Sensors
 constexpr float moistureRawMax = 1023.00;
