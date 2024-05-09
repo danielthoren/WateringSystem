@@ -1,4 +1,3 @@
-
 #ifndef FILTER
 #define FILTER
 

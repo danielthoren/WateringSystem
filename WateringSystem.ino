@@ -1,6 +1,8 @@
 #include "FlowerPot.hpp"
 #include "Sensor.hpp"
 
+#include "Menu.hpp"
+
 constexpr size_t hwSupportedPotNum = 6;
 
 constexpr uint8_t errorPin = 12;
@@ -63,6 +65,8 @@ void setup()
     errorPin,
     3
     };
+
+  MenuInit();
 }
 
 constexpr unsigned long sensorPrintTimeout = FlowerPot::m_idleWaittimeMs;
@@ -86,4 +90,6 @@ void loop()
       Serial.println("");
     }
   }
+
+  MenuUpdate();
 }
