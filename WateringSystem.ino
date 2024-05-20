@@ -12,12 +12,11 @@ constexpr float moistureRawMin = 0.0;
 constexpr uint8_t sensorPowerPin = 13;
 constexpr unsigned moistureThreshold = 40;
 
-constexpr uint8_t sensorPins[] = {A7, A6, A3, A2, A1, A0};
+constexpr uint8_t sensorPins[] = {A0, A1, A2, A3, A6, A7};
 ResistiveMoistureSensor sensors[numPots];
 
 // Flower pots
-constexpr uint8_t wateringTime = 2;
-constexpr uint8_t motorPins[] = {7, 8, 9, 10, 11, 12};
+constexpr uint8_t motorPins[] = {12, 11, 10, 9, 8, 7};
 FlowerPot pots[numPots];
 
 void setup()
