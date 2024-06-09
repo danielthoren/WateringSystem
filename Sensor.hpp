@@ -46,7 +46,7 @@ public:
     m_maxSensorRange{maxSensorRange},
     m_triggerThresholdPercent{triggerThresholdPercent},
     m_invertTrigger{invertTrigger},
-    m_filter{filterAlpha}
+    m_filter{filterAlpha, maxSensorRange}
   {
     ASSERT(minSensorRange != maxSensorRange, "The lower and upper sensor range must not be equal");
     ASSERT(triggerThresholdPercent < 100, "The trigger threshold cannot be larger than, or equal to, 100%");
@@ -91,8 +91,7 @@ public:
 
   unsigned getPercentageValue()
   {
-    float sensorRange = m_maxSensorRange - m_minSensorRange;
-    return 100 - ((static_cast<float>(m_filter.getValue()) / sensorRange) * 100);
+    return map(m_filter.getValue(), m_minSensorRange, m_maxSensorRange, 0, 100);
   }
 
 private:
