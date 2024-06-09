@@ -1,14 +1,29 @@
 #include "FlowerPot.hpp"
 #include "Sensor.hpp"
 
-constexpr size_t hwSupportedPotNum = 6;
+/* #define KITCHEN */
+#define LIVING_ROOM_BIG_WINDOW
 
+constexpr size_t hwSupportedPotNum = 6;
 constexpr uint8_t errorPin = 12;
+
+#if defined KITCHEN
+
+constexpr size_t numPots = 4;
+
+constexpr float moistureRawMax = 0;
+constexpr float moistureRawMin = 1023;
+
+#elif defined LIVING_ROOM_BIG_WINDOW
+
 constexpr size_t numPots = 6;
 
+constexpr float moistureRawMax = 320;
+constexpr float moistureRawMin = 687;
+
+#endif
+
 // Sensors
-constexpr float moistureRawMax = 1023.00;
-constexpr float moistureRawMin = 0.0;
 constexpr uint8_t sensorPowerPin = 13;
 constexpr unsigned moistureThreshold = 40;
 
@@ -24,29 +39,20 @@ void setup()
   ASSERT(numPots <= hwSupportedPotNum, "HW supported pot number exceeded");
   Serial.begin(9600);
 
-  for (size_t i{0}; i < numPots; ++i)
-  {
-    sensors[i] = {
-      .dataPin = sensorPins[i],
-      .powerPin = sensorPowerPin,
-      .minSensorRange = moistureRawMin,
-      .maxSensorRange = moistureRawMax,
-      .triggerThresholdPercent = moistureThreshold
-    };
-  }
+#if defined KITCHEN
 
   pots[0] = {
     &sensors[0],
     motorPins[0],
     errorPin,
-    2
+    3
     };
 
   pots[1] = {
     &sensors[1],
     motorPins[1],
     errorPin,
-    2
+    3
     };
 
   pots[2] = {
@@ -62,6 +68,65 @@ void setup()
     errorPin,
     3
     };
+
+#elif defined LIVING_ROOM_BIG_WINDOW
+
+  // Left-most plant
+  pots[0] = {
+    &sensors[0],
+    motorPins[0],
+    errorPin,
+    6
+    };
+
+  pots[1] = {
+    &sensors[1],
+    motorPins[1],
+    errorPin,
+    3
+    };
+
+  pots[2] = {
+    &sensors[2],
+    motorPins[2],
+    errorPin,
+    3
+    };
+
+    pots[3] = {
+    &sensors[3],
+    motorPins[3],
+    errorPin,
+    2
+    };
+
+    pots[4] = {
+    &sensors[4],
+    motorPins[4],
+    errorPin,
+    3
+    };
+
+    pots[5] = {
+    &sensors[5],
+    motorPins[5],
+    errorPin,
+    2
+    };
+
+#endif
+
+
+  for (size_t i{0}; i < numPots; ++i)
+  {
+    sensors[i] = {
+      .dataPin = sensorPins[i],
+      .powerPin = sensorPowerPin,
+      .minSensorRange = moistureRawMin,
+      .maxSensorRange = moistureRawMax,
+      .triggerThresholdPercent = moistureThreshold
+    };
+  }
 }
 
 constexpr unsigned long sensorPrintTimeout = FlowerPot::m_idleWaittimeMs;

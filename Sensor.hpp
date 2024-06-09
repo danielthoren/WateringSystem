@@ -56,7 +56,13 @@ public:
 
     // If sensor disconnected, pullup ensures that it registers full
     // moisture to avoid motor activating
+
+    // TODO: Capacitive moisture sensor does not work with pullup
+#ifdef KITCHEN
     pinMode(m_dataPin, INPUT_PULLUP);
+#else
+    pinMode(m_dataPin, INPUT);
+#endif
 
     m_initialized = true;
   }
@@ -69,7 +75,7 @@ public:
     // Power on sensor
     digitalWrite(m_powerPin, HIGH);
     // Allow power to settle
-    delay(50);
+    delay(100);
     m_filter.filter(analogRead(m_dataPin));
 
     // Power off sensor
@@ -92,6 +98,11 @@ public:
   unsigned getPercentageValue()
   {
     return map(m_filter.getValue(), m_minSensorRange, m_maxSensorRange, 0, 100);
+  }
+
+  unsigned getRawValue()
+  {
+    return m_filter.getValue();
   }
 
 private:
