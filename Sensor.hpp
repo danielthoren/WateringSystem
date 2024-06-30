@@ -14,6 +14,9 @@ public:
   virtual bool isTriggered() = 0;
   virtual void sample() = 0;
 
+  virtual unsigned getPercentageValue() = 0;
+  virtual unsigned getRawValue() = 0;
+
   bool isInitialized() { return m_initialized; }
 
 protected:
@@ -39,7 +42,7 @@ public:
                           unsigned maxSensorRange,
                           uint8_t triggerThresholdPercent,
                           bool invertTrigger = false,
-                          double filterAlpha = 0.3) :
+                          double filterAlpha = 0.8) :
     m_dataPin{dataPin},
     m_powerPin{powerPin},
     m_minSensorRange{minSensorRange},
@@ -95,12 +98,13 @@ public:
       return sensorValue < m_triggerThresholdPercent;
   }
 
-  unsigned getPercentageValue()
+  unsigned getPercentageValue() override
   {
+    // TODO: Bound the raw value to the max/min range to avoid strange percentage values
     return map(m_filter.getValue(), m_minSensorRange, m_maxSensorRange, 0, 100);
   }
 
-  unsigned getRawValue()
+  unsigned getRawValue() override
   {
     return m_filter.getValue();
   }

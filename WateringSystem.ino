@@ -111,7 +111,7 @@ void setup()
     &sensors[5],
     motorPins[5],
     errorPin,
-    2
+    4
     };
 
 #endif
@@ -129,7 +129,8 @@ void setup()
   }
 }
 
-constexpr unsigned long sensorPrintTimeout = FlowerPot::m_idleWaittimeMs;
+constexpr unsigned long sensorPrintTimeout = msFromMin(10);
+/* constexpr unsigned long sensorPrintTimeout = FlowerPot::m_idleWaittimeMs; */
 unsigned long lastSensorPrintTime = millis();
 
 void loop()
@@ -144,8 +145,11 @@ void loop()
 
       for (size_t i{0}; i < numPots; ++i)
       {
+        Serial.print(" { ");
         Serial.print(sensors[i].getPercentageValue());
-        Serial.print("  ");
+        Serial.print(" : ");
+        Serial.print(sensors[i].getRawValue());
+        Serial.print(" } ");
       }
       Serial.println("");
     }
