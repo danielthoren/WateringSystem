@@ -100,8 +100,11 @@ public:
 
   unsigned getPercentageValue() override
   {
-    // TODO: Bound the raw value to the max/min range to avoid strange percentage values
-    return map(m_filter.getValue(), m_minSensorRange, m_maxSensorRange, 0, 100);
+    unsigned boundedValue = constrain(m_filter.getValue(),
+                                      min(m_minSensorRange, m_maxSensorRange),
+                                      max(m_minSensorRange, m_maxSensorRange));
+
+    return map( boundedValue, m_minSensorRange, m_maxSensorRange, 0, 100);
   }
 
   unsigned getRawValue() override

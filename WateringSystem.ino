@@ -38,8 +38,11 @@ void setup()
 {
   ASSERT(numPots <= hwSupportedPotNum, "HW supported pot number exceeded");
   Serial.begin(9600);
+  double alpha = 0;
 
 #if defined KITCHEN
+
+  alpha = 1;
 
   pots[0] = {
     &sensors[0],
@@ -70,6 +73,8 @@ void setup()
     };
 
 #elif defined LIVING_ROOM_BIG_WINDOW
+
+  alpha = 0.6;
 
   // Left-most plant
   pots[0] = {
@@ -124,7 +129,9 @@ void setup()
       .powerPin = sensorPowerPin,
       .minSensorRange = moistureRawMin,
       .maxSensorRange = moistureRawMax,
-      .triggerThresholdPercent = moistureThreshold
+      .triggerThresholdPercent = moistureThreshold,
+      .invertTrigger = false,
+      .filterAplha = alpha
     };
   }
 }

@@ -16,7 +16,7 @@ public:
     m_alpha{alpha},
     m_filterValue{startVal}
   {
-    ASSERT(0 < alpha && alpha < 1, "Alpha must be within: 0 < a < 1 ");
+    ASSERT(0 < alpha && alpha <= 1, "Alpha must be within: 0 < a <= 1 ");
     m_initialized = true;
   }
 
