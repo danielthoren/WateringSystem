@@ -1,8 +1,10 @@
-#include "FlowerPot.hpp"
-#include "Sensor.hpp"
 
 /* #define KITCHEN */
 #define LIVING_ROOM_BIG_WINDOW
+
+
+#include "FlowerPot.hpp"
+#include "Sensor.hpp"
 
 constexpr size_t hwSupportedPotNum = 6;
 constexpr uint8_t errorPin = 12;
@@ -38,8 +40,11 @@ void setup()
 {
   ASSERT(numPots <= hwSupportedPotNum, "HW supported pot number exceeded");
   Serial.begin(9600);
+  double alpha = 0;
 
 #if defined KITCHEN
+
+  alpha = 1;
 
   pots[0] = {
     &sensors[0],
@@ -70,6 +75,8 @@ void setup()
     };
 
 #elif defined LIVING_ROOM_BIG_WINDOW
+
+  alpha = 1;
 
   // Left-most plant
   pots[0] = {
@@ -104,14 +111,14 @@ void setup()
     &sensors[4],
     motorPins[4],
     errorPin,
-    3
+    4
     };
 
     pots[5] = {
     &sensors[5],
     motorPins[5],
     errorPin,
-    4
+    5
     };
 
 #endif
@@ -124,7 +131,9 @@ void setup()
       .powerPin = sensorPowerPin,
       .minSensorRange = moistureRawMin,
       .maxSensorRange = moistureRawMax,
-      .triggerThresholdPercent = moistureThreshold
+      .triggerThresholdPercent = moistureThreshold,
+      .invertTrigger = false,
+      .filterAplha = alpha
     };
   }
 }

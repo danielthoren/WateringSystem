@@ -143,7 +143,8 @@ private:
 
   State WateringState()
   {
-    if (m_pSensor->isTriggered() == false)
+    // TODO: Add upper threshold for sensor
+    if (false)//m_pSensor->isTriggered() == false)
     {
       Serial.print(m_motorPin);
       Serial.println(F(": Moisture threshold reached, transition to state 'WAITING'"));

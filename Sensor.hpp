@@ -31,7 +31,7 @@ public:
     m_powerPin{},
     m_minSensorRange{},
     m_maxSensorRange{},
-    m_triggerThresholdPercent{},
+    m_lowerTriggerThresholdPercent{},
     m_invertTrigger{},
     m_filter{}
   {}
@@ -40,30 +40,31 @@ public:
                           uint8_t powerPin,
                           unsigned minSensorRange,
                           unsigned maxSensorRange,
-                          uint8_t triggerThresholdPercent,
+                          uint8_t lowerTriggerThresholdPercent,
                           bool invertTrigger = false,
                           double filterAlpha = 0.8) :
     m_dataPin{dataPin},
     m_powerPin{powerPin},
     m_minSensorRange{minSensorRange},
     m_maxSensorRange{maxSensorRange},
-    m_triggerThresholdPercent{triggerThresholdPercent},
+    m_lowerTriggerThresholdPercent{lowerTriggerThresholdPercent},
     m_invertTrigger{invertTrigger},
     m_filter{filterAlpha, maxSensorRange}
   {
     ASSERT(minSensorRange != maxSensorRange, "The lower and upper sensor range must not be equal");
-    ASSERT(triggerThresholdPercent < 100, "The trigger threshold cannot be larger than, or equal to, 100%");
+    ASSERT(lowerTriggerThresholdPercent < 100, "The trigger threshold cannot be larger than, or equal to, 100%");
 
     pinMode(m_powerPin, OUTPUT);
-    digitalWrite(m_powerPin, LOW);
 
     // If sensor disconnected, pullup ensures that it registers full
     // moisture to avoid motor activating
 
     // TODO: Capacitive moisture sensor does not work with pullup
-#ifdef KITCHEN
+#if defined KITCHEN
+    digitalWrite(m_powerPin, LOW);
     pinMode(m_dataPin, INPUT_PULLUP);
-#else
+#elif defined LIVING_ROOM_BIG_WINDOW
+    digitalWrite(m_powerPin, HIGH);
     pinMode(m_dataPin, INPUT);
 #endif
 
@@ -75,6 +76,7 @@ public:
     if (!isInitialized())
       return;
 
+#if defined KITCHEN
     // Power on sensor
     digitalWrite(m_powerPin, HIGH);
     // Allow power to settle
@@ -83,6 +85,10 @@ public:
 
     // Power off sensor
     digitalWrite(m_powerPin, LOW);
+
+#elif defined LIVING_ROOM_BIG_WINDOW
+    m_filter.filter(analogRead(m_dataPin));
+#endif
   }
 
   bool isTriggered() override
@@ -93,15 +99,18 @@ public:
     unsigned sensorValue = getPercentageValue();
 
     if (m_invertTrigger)
-      return sensorValue >= m_triggerThresholdPercent;
+      return sensorValue >= m_lowerTriggerThresholdPercent;
     else
-      return sensorValue < m_triggerThresholdPercent;
+      return sensorValue < m_lowerTriggerThresholdPercent;
   }
 
   unsigned getPercentageValue() override
   {
-    // TODO: Bound the raw value to the max/min range to avoid strange percentage values
-    return map(m_filter.getValue(), m_minSensorRange, m_maxSensorRange, 0, 100);
+    unsigned boundedValue = constrain(m_filter.getValue(),
+                                      min(m_minSensorRange, m_maxSensorRange),
+                                      max(m_minSensorRange, m_maxSensorRange));
+
+    return map( boundedValue, m_minSensorRange, m_maxSensorRange, 0, 100);
   }
 
   unsigned getRawValue() override
@@ -115,7 +124,7 @@ private:
   uint8_t m_powerPin;
   unsigned m_minSensorRange;
   unsigned m_maxSensorRange;
-  uint8_t m_triggerThresholdPercent;
+  uint8_t m_lowerTriggerThresholdPercent;
   bool m_invertTrigger;
   LowPassFilter<unsigned> m_filter;
 };
