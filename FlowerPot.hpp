@@ -55,6 +55,8 @@ public:
     ASSERT(wateringTime_sek != 0, "Watering time may not be 0");
 
     pinMode(m_motorPin, OUTPUT);
+    digitalWrite(m_motorPin, LOW);
+
     pinMode(m_errorLedPin, OUTPUT);
     digitalWrite(m_errorLedPin, LOW);
 
@@ -133,7 +135,6 @@ private:
 
       // Start watering before going to watering state
       digitalWrite(m_motorPin, HIGH); // turn on the motor
-      delay(50); // Wait for the relay to activate
       m_motorStartTimeMs = millis();
 
       return State::WATERING;

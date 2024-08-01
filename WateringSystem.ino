@@ -13,15 +13,15 @@ constexpr uint8_t errorPin = 12;
 
 constexpr size_t numPots = 4;
 
-constexpr float moistureRawMax = 0;
-constexpr float moistureRawMin = 1023;
+constexpr unsigned moistureRawMax = 400;
+constexpr unsigned moistureRawMin = 990;
 
 #elif defined LIVING_ROOM_BIG_WINDOW
 
 constexpr size_t numPots = 6;
 
-constexpr float moistureRawMax = 320;
-constexpr float moistureRawMin = 687;
+constexpr unsigned moistureRawMax = 320;
+constexpr unsigned moistureRawMin = 687;
 
 #endif
 
@@ -40,12 +40,27 @@ void setup()
 {
   ASSERT(numPots <= hwSupportedPotNum, "HW supported pot number exceeded");
   Serial.begin(9600);
-  double alpha = 0;
+  double alpha = 1;
 
+  for (size_t i{0}; i < numPots; ++i)
+  {
+    sensors[i] = {
+      .dataPin = sensorPins[i],
+      .powerPin = sensorPowerPin,
+      .minSensorRange = moistureRawMin,
+      .maxSensorRange = moistureRawMax,
+      .triggerThresholdPercent = moistureThreshold,
+      .invertTrigger = false,
+      .filterAplha = alpha
+    };
+  }
+
+  // Flowers left to right
 #if defined KITCHEN
 
-  alpha = 1;
+  alpha = 0.8;
 
+  sensors[0].setTriggerThreshold(20);
   pots[0] = {
     &sensors[0],
     motorPins[0],
@@ -122,20 +137,6 @@ void setup()
     };
 
 #endif
-
-
-  for (size_t i{0}; i < numPots; ++i)
-  {
-    sensors[i] = {
-      .dataPin = sensorPins[i],
-      .powerPin = sensorPowerPin,
-      .minSensorRange = moistureRawMin,
-      .maxSensorRange = moistureRawMax,
-      .triggerThresholdPercent = moistureThreshold,
-      .invertTrigger = false,
-      .filterAplha = alpha
-    };
-  }
 }
 
 constexpr unsigned long sensorPrintTimeout = msFromMin(10);

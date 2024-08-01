@@ -49,7 +49,7 @@ public:
     m_maxSensorRange{maxSensorRange},
     m_lowerTriggerThresholdPercent{lowerTriggerThresholdPercent},
     m_invertTrigger{invertTrigger},
-    m_filter{filterAlpha, maxSensorRange}
+    m_filter{filterAlpha, static_cast<double>(maxSensorRange)}
   {
     ASSERT(minSensorRange != maxSensorRange, "The lower and upper sensor range must not be equal");
     ASSERT(lowerTriggerThresholdPercent < 100, "The trigger threshold cannot be larger than, or equal to, 100%");
@@ -116,6 +116,11 @@ public:
   unsigned getRawValue() override
   {
     return m_filter.getValue();
+  }
+
+  void setTriggerThreshold(uint8_t threshold)
+  {
+    m_lowerTriggerThresholdPercent = threshold;
   }
 
 private:
