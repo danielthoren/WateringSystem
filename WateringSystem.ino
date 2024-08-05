@@ -2,7 +2,6 @@
 /* #define KITCHEN */
 #define LIVING_ROOM_BIG_WINDOW
 
-
 #include "FlowerPot.hpp"
 #include "Sensor.hpp"
 
@@ -58,14 +57,14 @@ void setup()
   // Flowers left to right
 #if defined KITCHEN
 
-  alpha = 0.8;
+  alpha = 1;
 
   sensors[0].setTriggerThreshold(20);
   pots[0] = {
     &sensors[0],
     motorPins[0],
     errorPin,
-    3
+    4
     };
 
   pots[1] = {
@@ -139,15 +138,19 @@ void setup()
 #endif
 }
 
-constexpr unsigned long sensorPrintTimeout = msFromMin(10);
-/* constexpr unsigned long sensorPrintTimeout = FlowerPot::m_idleWaittimeMs; */
+/* constexpr unsigned long sensorPrintTimeout = msFromMin(10); */
+constexpr unsigned long sensorPrintTimeout = FlowerPot::m_idleWaittimeMs;
 unsigned long lastSensorPrintTime = millis();
 
 void loop()
 {
   for (size_t i{0}; i < numPots; ++i)
   {
-    pots[i].update();
+    // Only allow one pot at a time to be active
+    do
+    {
+      pots[i].update();
+    } while (!pots[i].isIdle());
 
     if (millis() - lastSensorPrintTime > sensorPrintTimeout)
     {
