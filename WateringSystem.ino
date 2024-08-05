@@ -1,6 +1,6 @@
 
-/* #define KITCHEN */
-#define LIVING_ROOM_BIG_WINDOW
+#define KITCHEN
+/* #define LIVING_ROOM_BIG_WINDOW */
 
 #include "FlowerPot.hpp"
 #include "Sensor.hpp"
@@ -10,7 +10,7 @@ constexpr uint8_t errorPin = 12;
 
 #if defined KITCHEN
 
-constexpr size_t numPots = 4;
+constexpr size_t numPots = 5;
 
 constexpr unsigned moistureRawMax = 400;
 constexpr unsigned moistureRawMin = 990;
@@ -57,15 +57,7 @@ void setup()
   // Flowers left to right
 #if defined KITCHEN
 
-  alpha = 1;
-
-  sensors[0].setTriggerThreshold(20);
-  pots[0] = {
-    &sensors[0],
-    motorPins[0],
-    errorPin,
-    4
-    };
+  alpha = 0.8;
 
   pots[1] = {
     &sensors[1],
@@ -78,12 +70,19 @@ void setup()
     &sensors[2],
     motorPins[2],
     errorPin,
-    2
+    3
     };
 
   pots[3] = {
     &sensors[3],
     motorPins[3],
+    errorPin,
+    2
+    };
+
+  pots[4] = {
+    &sensors[4],
+    motorPins[4],
     errorPin,
     3
     };
@@ -138,8 +137,8 @@ void setup()
 #endif
 }
 
-/* constexpr unsigned long sensorPrintTimeout = msFromMin(10); */
-constexpr unsigned long sensorPrintTimeout = FlowerPot::m_idleWaittimeMs;
+constexpr unsigned long sensorPrintTimeout = msFromMin(10);
+/* constexpr unsigned long sensorPrintTimeout = FlowerPot::m_idleWaittimeMs; */
 unsigned long lastSensorPrintTime = millis();
 
 void loop()

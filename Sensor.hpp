@@ -62,7 +62,7 @@ public:
     // TODO: Capacitive moisture sensor does not work with pullup
 #if defined KITCHEN
     digitalWrite(m_powerPin, LOW);
-    pinMode(m_dataPin, INPUT_PULLUP);
+    pinMode(m_dataPin, INPUT);
 #elif defined LIVING_ROOM_BIG_WINDOW
     digitalWrite(m_powerPin, HIGH);
     pinMode(m_dataPin, INPUT);

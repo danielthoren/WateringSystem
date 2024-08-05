@@ -15,7 +15,7 @@ public:
   static constexpr unsigned long m_minWaterInterval = msFromMin(30);
 
    // how long to wait between checking moisture level when idle
-  static constexpr float m_idleWaittimeMs = 1000;//msFromMin(10);
+  static constexpr float m_idleWaittimeMs = msFromMin(10);
 
   // how long to wait between updates when active
   static constexpr float m_activeWaittimeMs = 100;
