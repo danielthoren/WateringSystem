@@ -59,18 +59,25 @@ void setup()
 
   alpha = 0.8;
 
+  pots[0] = {
+    &sensors[0],
+    motorPins[0],
+    errorPin,
+    2
+    };
+
   pots[1] = {
     &sensors[1],
     motorPins[1],
     errorPin,
-    3
+    2
     };
 
   pots[2] = {
     &sensors[2],
     motorPins[2],
     errorPin,
-    3
+    2
     };
 
   pots[3] = {
@@ -78,13 +85,6 @@ void setup()
     motorPins[3],
     errorPin,
     2
-    };
-
-  pots[4] = {
-    &sensors[4],
-    motorPins[4],
-    errorPin,
-    3
     };
 
 #elif defined LIVING_ROOM_BIG_WINDOW
@@ -137,8 +137,8 @@ void setup()
 #endif
 }
 
-constexpr unsigned long sensorPrintTimeout = msFromMin(10);
-/* constexpr unsigned long sensorPrintTimeout = FlowerPot::m_idleWaittimeMs; */
+/* constexpr unsigned long sensorPrintTimeout = msFromMin(10); */
+constexpr unsigned long sensorPrintTimeout = FlowerPot::m_idleWaittimeMs;
 unsigned long lastSensorPrintTime = millis();
 
 void loop()
@@ -149,7 +149,7 @@ void loop()
     do
     {
       pots[i].update();
-    } while (!pots[i].isIdle());
+    } while (pots[i].isActive());
 
     if (millis() - lastSensorPrintTime > sensorPrintTimeout)
     {

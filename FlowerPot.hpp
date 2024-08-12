@@ -63,12 +63,14 @@ public:
     m_initialized = true;
   }
 
+  bool isActive()
+  {
+    return m_state == State::WATERING;
+  }
+
   bool isIdle()
   {
-    return
-      m_state == State::IDLE ||
-      m_state == State::WAITING ||
-      m_state == State::MIN_WATER_INTERVAL_ERROR;
+    return !isActive();
   }
 
   bool isInitialized()
