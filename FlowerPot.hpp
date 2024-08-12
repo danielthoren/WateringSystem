@@ -15,17 +15,19 @@ public:
   static constexpr unsigned long m_minWaterInterval = msFromMin(30);
 
    // how long to wait between checking moisture level when idle
-  static constexpr float m_idleWaittimeMs = msFromMin(10);
+  static constexpr float m_idleWaittimeMs = 1000; //msFromMin(10);
 
   // how long to wait between updates when active
   static constexpr float m_activeWaittimeMs = 100;
 
+  // Soft pwm dutycycle length
+  static constexpr unsigned m_dutyCycleLenUs = 1000;
+
   enum class State
   {
     // Reading moisture at a slow interval, waiting for it to reach the threshold.
+    // Once the threshold is reached, the pot is watered in a blocking way.
     IDLE,
-    // Performs the watering action, activating the pump for a fixed time.
-    WATERING,
     // Waiting after watering is complete to let the water soak the soil.
     WAITING,
     // The moisture sensor triggered too often, likely due to a broken sensor.
@@ -35,19 +37,19 @@ public:
   FlowerPot() :
     m_pSensor{nullptr},
     m_motorPin{},
-    m_errorLedPin{},
+    m_motorSpeed{},
     m_wateringTimeMs{},
     m_waitTimeAfterWateringMs{}
   {}
 
   FlowerPot(ISensor* pSensor,
             uint8_t motorPin,
-            uint8_t errorLedPin,
+            uint8_t motorSpeed,
             uint8_t wateringTime_sek,
             uint8_t waitTimeAfterWatering_min = 10) :
     m_pSensor{pSensor},
     m_motorPin{motorPin},
-    m_errorLedPin{errorLedPin},
+    m_motorSpeed{motorSpeed},
     m_wateringTimeMs{msFromSec(wateringTime_sek)},
     m_waitTimeAfterWateringMs{msFromMin(waitTimeAfterWatering_min)}
   {
@@ -57,20 +59,10 @@ public:
     pinMode(m_motorPin, OUTPUT);
     digitalWrite(m_motorPin, LOW);
 
-    pinMode(m_errorLedPin, OUTPUT);
-    digitalWrite(m_errorLedPin, LOW);
+    pinMode(3, OUTPUT);
+    digitalWrite(3, HIGH);
 
-    m_initialized = true;
-  }
-
-  bool isActive()
-  {
-    return m_state == State::WATERING;
-  }
-
-  bool isIdle()
-  {
-    return !isActive();
+    m_state = State::IDLE;
   }
 
   bool isInitialized()
@@ -84,7 +76,7 @@ public:
       return State::IDLE;
 
     // Limit speed of updates
-    if (isIdle() && millis() - m_lastUpdateTimeMs < m_idleWaittimeMs)
+    if (millis() - m_lastUpdateTimeMs < m_idleWaittimeMs)
     {
       return m_state;
     }
@@ -100,11 +92,10 @@ public:
       case State::IDLE:
         m_state = IdleState();
         break;
-      case State::WATERING:
-        m_state = WateringState();
-        break;
       case State::WAITING:
         m_state = waitingState();
+      default:
+        break;
     }
 
     return m_state;
@@ -121,52 +112,35 @@ private:
         Serial.print(m_motorPin);
         Serial.println(F(": Moisture sensor triggered earlier than the expected minimum time between watering, assuming failure..."));
 
-        digitalWrite(m_errorLedPin, HIGH);
         return State::MIN_WATER_INTERVAL_ERROR;
       }
 
-      Serial.print(m_motorPin);
+      Serial.println(F(": Start watering"));
 
+      Serial.print(m_motorPin);
       Serial.print("Sensor value: { ");
       Serial.print(m_pSensor->getPercentageValue());
       Serial.print(" : ");
       Serial.print(m_pSensor->getRawValue());
-      Serial.println("");
+      Serial.println("}");
 
-      Serial.println(F(": Start watering, transition to state 'WATERING'"));
+      uint16_t on_time = (static_cast<double>(m_motorSpeed) / 100) * m_dutyCycleLenUs;
+      uint16_t off_time = m_dutyCycleLenUs - on_time;
 
-      // Start watering before going to watering state
-      digitalWrite(m_motorPin, HIGH); // turn on the motor
-      m_motorStartTimeMs = millis();
+      // Run the pump using software PWM for the configured duration
+      unsigned long startTime = millis();
+      while (millis() - startTime < m_wateringTimeMs)
+      {
+        digitalWrite(m_motorPin, HIGH);
+        delayMicroseconds(on_time);
+        digitalWrite(m_motorPin, LOW);
+        delayMicroseconds(off_time);
+      }
+      m_lastWaterTimeMs = millis();
 
-      return State::WATERING;
+      return State::WAITING;
     }
     return State::IDLE;
-  }
-
-  State WateringState()
-  {
-    // TODO: Add upper threshold for sensor
-    if (false)//m_pSensor->isTriggered() == false)
-    {
-      Serial.print(m_motorPin);
-      Serial.println(F(": Moisture threshold reached, transition to state 'WAITING'"));
-
-      digitalWrite(m_motorPin, LOW);  // turn off the motor
-      m_lastWaterTimeMs = millis();
-      return State::WAITING;
-    }
-    else if (millis() - m_motorStartTimeMs > m_wateringTimeMs)
-    {
-      Serial.print(m_motorPin);
-      Serial.println(F(": Watering timeout reached, transition to state 'WAITING'"));
-
-      digitalWrite(m_motorPin, LOW);  // turn off the motor
-      m_lastWaterTimeMs = millis();
-      return State::WAITING;
-    }
-
-    return State::WATERING;
   }
 
   State waitingState()
@@ -182,12 +156,11 @@ private:
 
   ISensor* m_pSensor;
   uint8_t m_motorPin;
-  uint8_t m_errorLedPin;
+  uint8_t m_motorSpeed;
   unsigned long m_wateringTimeMs;
   uint32_t m_waitTimeAfterWateringMs{};
 
   unsigned long m_lastWaterTimeMs{0};
-  unsigned long m_motorStartTimeMs{0};
   unsigned long m_lastUpdateTimeMs{0};
 
   State m_state{State::IDLE};

@@ -6,11 +6,10 @@
 #include "Sensor.hpp"
 
 constexpr size_t hwSupportedPotNum = 6;
-constexpr uint8_t errorPin = 12;
 
 #if defined KITCHEN
 
-constexpr size_t numPots = 5;
+constexpr size_t numPots = 4;
 
 constexpr unsigned moistureRawMax = 400;
 constexpr unsigned moistureRawMin = 990;
@@ -62,28 +61,28 @@ void setup()
   pots[0] = {
     &sensors[0],
     motorPins[0],
-    errorPin,
+    50,
     2
     };
 
   pots[1] = {
     &sensors[1],
     motorPins[1],
-    errorPin,
+    50,
     2
     };
 
   pots[2] = {
     &sensors[2],
     motorPins[2],
-    errorPin,
+    50,
     2
     };
 
   pots[3] = {
     &sensors[3],
     motorPins[3],
-    errorPin,
+    50,
     2
     };
 
@@ -95,42 +94,42 @@ void setup()
   pots[0] = {
     &sensors[0],
     motorPins[0],
-    errorPin,
+    100,
     6
     };
 
   pots[1] = {
     &sensors[1],
     motorPins[1],
-    errorPin,
+    50,
     3
     };
 
   pots[2] = {
     &sensors[2],
     motorPins[2],
-    errorPin,
+    50,
     3
     };
 
     pots[3] = {
     &sensors[3],
     motorPins[3],
-    errorPin,
+    50,
     2
     };
 
     pots[4] = {
     &sensors[4],
     motorPins[4],
-    errorPin,
+    100,
     4
     };
 
     pots[5] = {
     &sensors[5],
     motorPins[5],
-    errorPin,
+    50,
     5
     };
 
@@ -145,11 +144,7 @@ void loop()
 {
   for (size_t i{0}; i < numPots; ++i)
   {
-    // Only allow one pot at a time to be active
-    do
-    {
-      pots[i].update();
-    } while (pots[i].isActive());
+    pots[i].update();
 
     if (millis() - lastSensorPrintTime > sensorPrintTimeout)
     {

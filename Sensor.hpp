@@ -73,8 +73,7 @@ public:
 
   void sample() override
   {
-    if (!isInitialized())
-      return;
+    ASSERT(isInitialized(), "Sensor not initialized!");
 
 #if defined KITCHEN
     // Power on sensor
@@ -93,9 +92,7 @@ public:
 
   bool isTriggered() override
   {
-    if (!isInitialized())
-      return false;
-
+    ASSERT(isInitialized(), "Sensor not initialized!");
     unsigned sensorValue = getPercentageValue();
 
     if (m_invertTrigger)
@@ -106,6 +103,7 @@ public:
 
   unsigned getPercentageValue() override
   {
+    ASSERT(isInitialized(), "Sensor not initialized!");
     unsigned boundedValue = constrain(m_filter.getValue(),
                                       min(m_minSensorRange, m_maxSensorRange),
                                       max(m_minSensorRange, m_maxSensorRange));
@@ -115,11 +113,13 @@ public:
 
   unsigned getRawValue() override
   {
+    ASSERT(isInitialized(), "Sensor not initialized!");
     return m_filter.getValue();
   }
 
   void setTriggerThreshold(uint8_t threshold)
   {
+    ASSERT(isInitialized(), "Sensor not initialized!");
     m_lowerTriggerThresholdPercent = threshold;
   }
 
