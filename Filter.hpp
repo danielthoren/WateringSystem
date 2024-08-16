@@ -20,22 +20,22 @@ public:
     m_initialized = true;
   }
 
-  bool isInitialized()
+  bool isInitialized() const
   {
     return m_initialized;
   }
 
   T filter(T value)
   {
-    if (!isInitialized())
-      return T{};
+    ASSERT(isInitialized(), "Filter not initialized!");
 
     m_filterValue = m_alpha * static_cast<double>(value) + (1 - m_alpha) * m_filterValue;
     return static_cast<T>(m_filterValue);
   }
 
-  T getValue()
+  T getValue() const
   {
+    ASSERT(isInitialized(), "Filter not initialized!");
     return m_filterValue;
   }
 

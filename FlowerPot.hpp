@@ -25,6 +25,8 @@ public:
 
   enum class State
   {
+    // Initial state, changed to IDLE once initialized
+    UNINITIALIZED,
     // Reading moisture at a slow interval, waiting for it to reach the threshold.
     // Once the threshold is reached, the pot is watered in a blocking way.
     IDLE,
@@ -65,15 +67,15 @@ public:
     m_state = State::IDLE;
   }
 
-  bool isInitialized()
+  bool isInitialized() const
   {
-    return m_initialized;
+    return m_state != State::UNINITIALIZED;
   }
 
   State update()
   {
     if (!isInitialized())
-      return State::IDLE;
+      return State::UNINITIALIZED;
 
     // Limit speed of updates
     if (millis() - m_lastUpdateTimeMs < m_idleWaittimeMs)
@@ -163,9 +165,7 @@ private:
   unsigned long m_lastWaterTimeMs{0};
   unsigned long m_lastUpdateTimeMs{0};
 
-  State m_state{State::IDLE};
-
-  bool m_initialized{false};
+  State m_state{State::UNINITIALIZED};
 };
 
 #endif

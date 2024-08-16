@@ -11,13 +11,13 @@ public:
   ISensor() = default;
   virtual ~ISensor() = default;
 
-  virtual bool isTriggered() = 0;
+  virtual bool isTriggered() const = 0;
   virtual void sample() = 0;
 
-  virtual unsigned getPercentageValue() = 0;
-  virtual unsigned getRawValue() = 0;
+  virtual unsigned getPercentageValue() const = 0;
+  virtual unsigned getRawValue() const = 0;
 
-  bool isInitialized() { return m_initialized; }
+  bool isInitialized() const { return m_initialized; }
 
 protected:
   bool m_initialized{false};
@@ -90,7 +90,7 @@ public:
 #endif
   }
 
-  bool isTriggered() override
+  bool isTriggered() const override
   {
     ASSERT(isInitialized(), "Sensor not initialized!");
     unsigned sensorValue = getPercentageValue();
@@ -101,17 +101,17 @@ public:
       return sensorValue < m_lowerTriggerThresholdPercent;
   }
 
-  unsigned getPercentageValue() override
+  unsigned getPercentageValue() const override
   {
     ASSERT(isInitialized(), "Sensor not initialized!");
     unsigned boundedValue = constrain(m_filter.getValue(),
                                       min(m_minSensorRange, m_maxSensorRange),
                                       max(m_minSensorRange, m_maxSensorRange));
 
-    return map( boundedValue, m_minSensorRange, m_maxSensorRange, 0, 100);
+    return map(boundedValue, m_minSensorRange, m_maxSensorRange, 0, 100);
   }
 
-  unsigned getRawValue() override
+  unsigned getRawValue() const override
   {
     ASSERT(isInitialized(), "Sensor not initialized!");
     return m_filter.getValue();
