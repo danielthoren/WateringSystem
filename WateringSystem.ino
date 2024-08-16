@@ -1,6 +1,6 @@
 
-#define KITCHEN
-/* #define LIVING_ROOM_BIG_WINDOW */
+/* #define KITCHEN */
+#define LIVING_ROOM_BIG_WINDOW
 
 #include "FlowerPot.hpp"
 #include "Sensor.hpp"
@@ -62,60 +62,60 @@ void setup()
     &sensors[0],
     motorPins[0],
     50,
-    2
+    5
     };
 
   pots[1] = {
     &sensors[1],
     motorPins[1],
-    50,
-    2
+    60,
+    4
     };
 
   pots[2] = {
     &sensors[2],
     motorPins[2],
-    50,
-    2
+    60,
+    4
     };
 
   pots[3] = {
     &sensors[3],
     motorPins[3],
-    50,
-    2
+    60,
+    4
     };
 
 #elif defined LIVING_ROOM_BIG_WINDOW
 
   alpha = 1;
 
-  // Left-most plant
-  pots[0] = {
-    &sensors[0],
-    motorPins[0],
-    100,
-    6
-    };
+  //Left-most plant
+  /* pots[0] = { */
+  /*   &sensors[0], */
+  /*   motorPins[0], */
+  /*   100, */
+  /*   6 */
+  /*   }; */
 
   pots[1] = {
     &sensors[1],
     motorPins[1],
     50,
-    3
+    4
     };
 
   pots[2] = {
     &sensors[2],
     motorPins[2],
     50,
-    3
+    4
     };
 
     pots[3] = {
     &sensors[3],
     motorPins[3],
-    50,
+    55,
     2
     };
 
@@ -129,14 +129,13 @@ void setup()
     pots[5] = {
     &sensors[5],
     motorPins[5],
-    50,
+    45,
     5
     };
 
 #endif
 }
 
-/* constexpr unsigned long sensorPrintTimeout = msFromMin(10); */
 constexpr unsigned long sensorPrintTimeout = FlowerPot::m_idleWaittimeMs;
 unsigned long lastSensorPrintTime = millis();
 
