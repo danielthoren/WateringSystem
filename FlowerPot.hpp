@@ -15,7 +15,11 @@ public:
   static constexpr unsigned long m_minWaterInterval = msFromMin(30);
 
    // how long to wait between checking moisture level when idle
-  static constexpr float m_idleWaittimeMs = 1000; //msFromMin(10);
+#if defined KITCHEN
+  static constexpr float m_idleWaittimeMs = msFromMin(1);
+#elif defined LIVING_ROOM_BIG_WINDOW
+  static constexpr float m_idleWaittimeMs = 1000;
+#endif
 
   // how long to wait between updates when active
   static constexpr float m_activeWaittimeMs = 100;
@@ -60,9 +64,6 @@ public:
 
     pinMode(m_motorPin, OUTPUT);
     digitalWrite(m_motorPin, LOW);
-
-    pinMode(3, OUTPUT);
-    digitalWrite(3, HIGH);
 
     m_state = State::IDLE;
   }
