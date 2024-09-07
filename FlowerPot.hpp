@@ -104,6 +104,31 @@ public:
     return m_state;
   }
 
+  void runMotor(unsigned long timeMs, uint8_t motorSpeed) const
+  {
+    if (motorSpeed == 100)
+    {
+      digitalWrite(m_motorPin, HIGH);
+      delay(timeMs);
+      digitalWrite(m_motorPin, LOW);
+    }
+    else
+    {
+      uint16_t on_time = (static_cast<double>(motorSpeed) / 100) * m_dutyCycleLenUs;
+      uint16_t off_time = m_dutyCycleLenUs - on_time;
+
+      // Run the pump using software PWM for the configured duration
+      unsigned long startTime = millis();
+      while (millis() - startTime < timeMs)
+      {
+        digitalWrite(m_motorPin, HIGH);
+        delayMicroseconds(on_time);
+        digitalWrite(m_motorPin, LOW);
+        delayMicroseconds(off_time);
+      }
+    }
+  }
+
 private:
 
   State IdleState()
@@ -127,18 +152,7 @@ private:
       Serial.print(m_pSensor->getRawValue());
       Serial.println("}");
 
-      uint16_t on_time = (static_cast<double>(m_motorSpeed) / 100) * m_dutyCycleLenUs;
-      uint16_t off_time = m_dutyCycleLenUs - on_time;
-
-      // Run the pump using software PWM for the configured duration
-      unsigned long startTime = millis();
-      while (millis() - startTime < m_wateringTimeMs)
-      {
-        digitalWrite(m_motorPin, HIGH);
-        delayMicroseconds(on_time);
-        digitalWrite(m_motorPin, LOW);
-        delayMicroseconds(off_time);
-      }
+      runMotor(m_wateringTimeMs, m_motorSpeed);
       m_lastWaterTimeMs = millis();
 
       return State::WAITING;
