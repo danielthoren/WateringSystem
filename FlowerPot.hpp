@@ -17,7 +17,7 @@ public:
    // how long to wait between checking moisture level when idle
 #if defined KITCHEN
   static constexpr float m_idleWaittimeMs = msFromMin(1);
-#elif defined LIVING_ROOM_BIG_WINDOW
+#else
   static constexpr float m_idleWaittimeMs = 1000;
 #endif
 

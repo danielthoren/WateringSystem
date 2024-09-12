@@ -63,7 +63,7 @@ public:
 #if defined KITCHEN
     digitalWrite(m_powerPin, LOW);
     pinMode(m_dataPin, INPUT);
-#elif defined LIVING_ROOM_BIG_WINDOW
+#else
     digitalWrite(m_powerPin, HIGH);
     pinMode(m_dataPin, INPUT);
 #endif
@@ -85,7 +85,7 @@ public:
     // Power off sensor
     digitalWrite(m_powerPin, LOW);
 
-#elif defined LIVING_ROOM_BIG_WINDOW
+#else
     m_filter.filter(analogRead(m_dataPin));
 #endif
   }

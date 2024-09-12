@@ -1,6 +1,7 @@
 
 /* #define KITCHEN */
-#define LIVING_ROOM_BIG_WINDOW
+/* #define LIVING_ROOM_BIG_WINDOW */
+#define LIVING_ROOM_CENTER
 
 #include "FlowerPot.hpp"
 #include "Sensor.hpp"
@@ -17,6 +18,13 @@ constexpr unsigned moistureRawMin = 990;
 #elif defined LIVING_ROOM_BIG_WINDOW
 
 constexpr size_t numPots = 6;
+
+constexpr unsigned moistureRawMax = 320;
+constexpr unsigned moistureRawMin = 687;
+
+#elif defined LIVING_ROOM_CENTER
+
+constexpr size_t numPots = 3;
 
 constexpr unsigned moistureRawMax = 320;
 constexpr unsigned moistureRawMin = 687;
@@ -56,33 +64,33 @@ void setup()
   // Flowers left to right
 #if defined KITCHEN
 
-  alpha = 0.8;
+  alpha = 1;
 
   pots[0] = {
     &sensors[0],
     motorPins[0],
-    40,
+    60,
     6
     };
 
   pots[1] = {
     &sensors[1],
     motorPins[1],
-    50,
+    60,
     4
     };
 
   pots[2] = {
     &sensors[2],
     motorPins[2],
-    50,
+    60,
     4
     };
 
   pots[3] = {
     &sensors[3],
     motorPins[3],
-    50,
+    60,
     4
     };
 
@@ -131,6 +139,25 @@ void setup()
     motorPins[5],
     55,
     4
+    };
+
+#elif defined LIVING_ROOM_CENTER
+
+  alpha = 1;
+
+  //Left-most plant
+  pots[1] = {
+    &sensors[1],
+    motorPins[1],
+    100,
+    4
+    };
+
+  pots[2] = {
+    &sensors[2],
+    motorPins[2],
+    100,
+    3
     };
 
 #endif
