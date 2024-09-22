@@ -129,6 +129,11 @@ public:
     }
   }
 
+  ISensor* getSensor() const
+  {
+    return m_pSensor;
+  }
+
 private:
 
   State IdleState()

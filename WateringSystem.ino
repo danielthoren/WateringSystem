@@ -3,10 +3,12 @@
 /* #define LIVING_ROOM_BIG_WINDOW */
 #define LIVING_ROOM_CENTER
 
+constexpr size_t hwSupportedPotNum = 6;
+
 #include "FlowerPot.hpp"
 #include "Sensor.hpp"
-
-constexpr size_t hwSupportedPotNum = 6;
+#include "Menu.hpp"
+#include "CommonUtil.hpp"
 
 #if defined KITCHEN
 
@@ -40,10 +42,14 @@ ResistiveMoistureSensor sensors[numPots];
 
 // Flower pots
 constexpr uint8_t motorPins[] = {12, 11, 10, 9, 8, 7};
-FlowerPot pots[numPots];
+
+FlowerPot potData[numPots];
+Array<FlowerPot> pots{potData, numPots};
 
 void setup()
 {
+  MenuSetup(pots);
+
   ASSERT(numPots <= hwSupportedPotNum, "HW supported pot number exceeded");
   Serial.begin(9600);
   double alpha = 1;
@@ -168,23 +174,25 @@ unsigned long lastSensorPrintTime = millis() - sensorPrintTimeout;
 
 void loop()
 {
-  for (size_t i{0}; i < numPots; ++i)
-  {
-    pots[i].update();
+  MenuLoop();
 
-    if (millis() - lastSensorPrintTime > sensorPrintTimeout)
-    {
-      lastSensorPrintTime = millis();
+  /* for (size_t i{0}; i < numPots; ++i) */
+  /* { */
+  /*   pots[i].update(); */
 
-      for (size_t i{0}; i < numPots; ++i)
-      {
-        Serial.print(" { ");
-        Serial.print(sensors[i].getPercentageValue());
-        Serial.print(" : ");
-        Serial.print(sensors[i].getRawValue());
-        Serial.print(" } ");
-      }
-      Serial.println("");
-    }
-  }
+  /*   if (millis() - lastSensorPrintTime > sensorPrintTimeout) */
+  /*   { */
+  /*     lastSensorPrintTime = millis(); */
+
+  /*     for (size_t i{0}; i < numPots; ++i) */
+  /*     { */
+  /*       Serial.print(" { "); */
+  /*       Serial.print(sensors[i].getPercentageValue()); */
+  /*       Serial.print(" : "); */
+  /*       Serial.print(sensors[i].getRawValue()); */
+  /*       Serial.print(" } "); */
+  /*     } */
+  /*     Serial.println(""); */
+  /*   } */
+  /* } */
 }
