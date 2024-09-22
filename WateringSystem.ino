@@ -1,7 +1,7 @@
 
 /* #define KITCHEN */
-/* #define LIVING_ROOM_BIG_WINDOW */
-#define LIVING_ROOM_CENTER
+#define LIVING_ROOM_BIG_WINDOW
+/* #define LIVING_ROOM_CENTER */
 
 constexpr size_t hwSupportedPotNum = 6;
 

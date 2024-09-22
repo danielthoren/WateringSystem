@@ -107,6 +107,16 @@ public:
     ASSERT(m_initialized, "Not m_initialized");
   }
 
+  void up()
+  {
+    uint8_t newTopRow = max(static_cast<int>(m_topRow) - LCD_ROWS, 0);
+    if (newTopRow != m_topRow)
+    {
+      m_topRow = newTopRow;
+      m_changed = true;
+    }
+  }
+
   void down()
   {
     uint8_t newTopRow = min(m_topRow + LCD_ROWS,
@@ -115,16 +125,6 @@ public:
     {
       m_changed = true;
       m_topRow = newTopRow;
-    }
-  }
-
-  void up()
-  {
-    uint8_t newTopRow = max(static_cast<int>(m_topRow) - LCD_ROWS, 0);
-    if (newTopRow != m_topRow)
-    {
-      m_topRow = newTopRow;
-      m_changed = true;
     }
   }
 
