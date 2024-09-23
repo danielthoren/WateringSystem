@@ -44,7 +44,7 @@ public:
     return *this;
   }
 
-  size_t size()
+  size_t size() const
   {
     return m_size;
   }
@@ -69,7 +69,8 @@ public:
   const T *end() const { return &m_data[m_size]; }
 
   // Comparisons
-  bool operator==(const Array<T> &rhs) const {
+  bool operator==(const Array<T> &rhs) const
+  {
     if (this == &rhs)
       return true;
     for (size_t i = 0; i < m_size; i++)
@@ -77,7 +78,8 @@ public:
         return false;
     return true;
   }
-  bool operator!=(const Array<T> &rhs) const {
+  bool operator!=(const Array<T> &rhs) const
+  {
     return !(*this == rhs);
   }
 

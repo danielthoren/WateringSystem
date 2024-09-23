@@ -104,6 +104,53 @@ public:
   }
 };
 
+// class IStringWrapper
+// {
+// public:
+//   IStringWrapper(uint16_t size)
+//     : m_size{size}
+//   {}
+
+//   virtual ~IStringWrapper() = default;
+
+//   uint16_t size() const
+//   {
+//     return m_size;
+//   }
+
+//   char &operator[](uint16_t index) = 0;
+//   const char &operator[](uint16_t index) const = 0;
+
+//   // Iterators
+//   virtual char *begin() = 0;
+//   virtual const char *begin() const = 0;
+//   virtual char *end() = 0;
+//   virtual const char *end() const = 0;
+
+//   // Comparisons
+//   virtual bool operator==(const IStringWrapper &rhs) const = 0;
+
+//   bool operator!=(const IStringWrapper &rhs) const
+//   {
+//     return !(*this == rhs);
+//   }
+
+// private:
+//   uint16_t m_size;
+// };
+
+// class RamStringWrapper : public IStringWrapper
+// {
+// public:
+//   RamStringWrapper(char* pStr, uint16_t size)
+//     : IStringWrapper{size},
+//       m_pStr{pStr}
+//   {}
+
+// private:
+//   char* m_pStr{nullptr};
+// };
+
 enum class InputEvent
 {
   None,
@@ -115,11 +162,26 @@ enum class InputEvent
 class MenuItemBase
 {
 public:
-  virtual MenuItemBase* handleInput(InputEvent event, MenuItemBase* parent) = 0;
-  virtual void update() = 0;
+  virtual ~MenuItemBase() = default;
 
-  virtual void draw(DisplayAdapter& display) = 0;
+  virtual MenuItemBase* handleInput(InputEvent event) { return m_parent; };
+  virtual void update() {}
+
+  virtual void draw(DisplayAdapter& display) {}
   virtual char const* getTextLabel() = 0;
+
+  MenuItemBase* getParent() const
+  {
+    return m_parent;
+  }
+
+  void setParent(MenuItemBase* parent)
+  {
+    m_parent = parent;
+  }
+
+protected:
+  MenuItemBase* m_parent;
 };
 
 class MenuItemText : public MenuItemBase
@@ -128,15 +190,6 @@ public:
   MenuItemText(char* textLabel)
     : m_textLabel{textLabel}
   {}
-
-  virtual MenuItemBase* handleInput(InputEvent event, MenuItemBase* parent) override
-  {
-    return parent;
-  }
-
-  virtual void update() override {}
-
-  virtual void draw(DisplayAdapter& display) override {}
 
   virtual char const* getTextLabel() override
   {
@@ -155,7 +208,7 @@ public:
       m_textLabel{textLabel}
   {}
 
-  virtual MenuItemBase* handleInput(InputEvent event, MenuItemBase* parent) override
+  virtual MenuItemBase* handleInput(InputEvent event) override
   {
     switch (event)
     {
@@ -166,6 +219,12 @@ public:
         up();
         break;
       case(InputEvent::Enter):
+        if (m_activeItemIndex == -1) // Handle back menu
+        {
+          ASSERT(m_parent != nullptr, "Parent may not be null");
+          return m_parent;
+        }
+
         return m_items[m_activeItemIndex];
         break;
       default:
@@ -177,16 +236,11 @@ public:
     return dynamic_cast<MenuItemBase*>(this);
   }
 
-  virtual void update() override
-  {
-
-  }
-
   virtual void draw(DisplayAdapter& display) override
   {
     display.clear();
 
-    uint8_t currItem = m_topItemIndex;
+    int8_t currItem = m_topItemIndex;
     for (uint8_t row = 0; row < LCD_ROWS; row++, currItem++)
     {
       display.setCursor(row, 0);
@@ -198,17 +252,25 @@ public:
       {
         display.print(" ");
       }
-      display.print(m_items[currItem]->getTextLabel());
+
+      if (currItem == -1)
+      {
+        display.print("..");
+      }
+      else
+      {
+        display.print(m_items[currItem]->getTextLabel());
+      }
     }
 
-    if (0 < m_topItemIndex)
+    if (-1 < m_topItemIndex)
     {
       display.setCursor(0, LCD_COLS - 1);
       display.printUpIndicator();
     }
 
     uint8_t botItemIndex = m_topItemIndex + LCD_ROWS - 1;
-    if (botItemIndex < (m_items.size() - 1))
+    if (botItemIndex < (m_items.size()))
     {
       display.setCursor(LCD_ROWS - 1, LCD_COLS - 1);
       display.printDownIndicator();
@@ -223,40 +285,26 @@ public:
 private:
   void up()
   {
-    Serial.print("Up from: ");
-    Serial.println(m_activeItemIndex);
-
-    m_activeItemIndex = max(static_cast<int>(m_activeItemIndex) - 1, 0);
+    m_activeItemIndex = max(static_cast<int>(m_activeItemIndex) - 1, -1);
 
     if (m_activeItemIndex < m_topItemIndex) // Cursor above view window
     {
       m_topItemIndex = m_activeItemIndex;
-      Serial.println("Cursor at top");
     }
-
-    Serial.print(" to: ");
-    Serial.println(m_activeItemIndex);
   }
 
   void down()
   {
-    Serial.print("Down from: ");
-    Serial.println(m_activeItemIndex);
-
     m_activeItemIndex = min(static_cast<int>(m_activeItemIndex) + 1, m_items.size() - 1);
 
     if (m_activeItemIndex - m_topItemIndex > LCD_ROWS - 1) // Cursor below view window
     {
       m_topItemIndex = m_activeItemIndex - 1;
-      Serial.println("Cursor at bottom");
     }
-
-    Serial.print(" to: ");
-    Serial.println(m_activeItemIndex);
   }
 
-  uint8_t m_topItemIndex{0};
-  uint8_t m_activeItemIndex{0};
+  int8_t m_topItemIndex{0};
+  int8_t m_activeItemIndex{0};
   char* m_textLabel;
 
   Array<MenuItemBase*> m_items;
@@ -305,13 +353,8 @@ public:
 
     if (event != InputEvent::None || forceRedraw)
     {
-      MenuItemBase* nextItem = m_currentItem->handleInput(event, m_prevItem);
+      m_currentItem = m_currentItem->handleInput(event);
       m_currentItem->draw(m_display);
-      if (nextItem != m_currentItem)
-      {
-        m_prevItem = m_currentItem;
-        m_currentItem = nextItem;
-      }
     }
   }
 
@@ -323,30 +366,76 @@ private:
   DisplayAdapter m_display;
 };
 
-char itemTextStr1[] = "Item 1";
-MenuItemText itemText1{itemTextStr1};
+/*******************************************************************************
+ ***                            Pot settings menu                             ***
+ *******************************************************************************/
 
-char itemTextStr2[] = "Item 2";
-MenuItemText itemText2{itemTextStr2};
+/**************************************************
+ ***  Pot1 menu                                  ***
+ **************************************************/
 
-char itemTextStr3[] = "Item 3";
-MenuItemText itemText3{itemTextStr3};
+char sensorConfLabel[] = "Sensor config";
+MenuItemText sensorConfMenu{sensorConfLabel};
 
-MenuItemBase* menuListItems1[] = {
-  dynamic_cast<MenuItemBase*>(&itemText1),
-  dynamic_cast<MenuItemBase*>(&itemText2),
-  dynamic_cast<MenuItemBase*>(&itemText3),
+char motorConfLabel[] = "Motor config";
+MenuItemText motorConfMenu{ motorConfLabel};
+
+MenuItemBase* pot1MenuItems[2] = {
+  dynamic_cast<MenuItemBase*>(&sensorConfMenu),
+  dynamic_cast<MenuItemBase*>(&motorConfMenu)
 };
 
-Array<MenuItemBase*> menuListItemsArr1{menuListItems1, 3};
-char menuItemListLabel1[] = "Menu item list 1";
-MenuItemList menuItemList1{menuItemListLabel1, menuListItemsArr1};
+Array<MenuItemBase*> pot1MenuItemsArr{pot1MenuItems, 2};
+char pot1MenuLabel[] = "Pot 1";
+MenuItemList pot1MenuList = {pot1MenuLabel, pot1MenuItemsArr};
 
-Menu menu{&menuItemList1};
+/**************************************************
+ ***  Pots menu                                  ***
+ **************************************************/
+
+char potLabel2[] = "Pot 2";
+MenuItemText potMenuItem2{potLabel2};
+
+char potLabel3[] = "Pot 3";
+MenuItemText potMenuItem3{potLabel3};
+
+char potLabel4[] = "Pot 4";
+MenuItemText potMenuItem4{potLabel4};
+
+char potLabel5[] = "Pot 5";
+MenuItemText potMenuItem5{potLabel5};
+
+char potLabel6[] = "Pot 6";
+MenuItemText potMenuItem6{potLabel6};
+
+MenuItemBase* potsMenuItems[] = {
+  dynamic_cast<MenuItemBase*>(&pot1MenuList),
+  dynamic_cast<MenuItemBase*>(&potMenuItem2),
+  dynamic_cast<MenuItemBase*>(&potMenuItem3),
+  dynamic_cast<MenuItemBase*>(&potMenuItem4),
+  dynamic_cast<MenuItemBase*>(&potMenuItem5),
+  dynamic_cast<MenuItemBase*>(&potMenuItem6),
+};
+
+Array<MenuItemBase*> potsMenuItemsArr{potsMenuItems, 6};
+char potsMenuLabel[] = "Pot settings";
+MenuItemList potsMenuItemList = {potsMenuLabel, potsMenuItemsArr};
+
+Menu menu{&potsMenuItemList};
 
 // MoistureLevelScreen moistureScreen;
 
 void MenuSetup(Array<FlowerPot> pots) {
+  sensorConfMenu.setParent(&pot1MenuList);
+  motorConfMenu.setParent(&pot1MenuList);
+
+  pot1MenuList.setParent(&potsMenuItemList);
+  potMenuItem2.setParent(&potsMenuItemList);
+  potMenuItem3.setParent(&potsMenuItemList);
+  potMenuItem4.setParent(&potsMenuItemList);
+  potMenuItem5.setParent(&potsMenuItemList);
+  potMenuItem6.setParent(&potsMenuItemList);
+
   // moistureScreen = MoistureLevelScreen{pots, &lcd};
   // moistureScreen.show();
 
