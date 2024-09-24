@@ -5,10 +5,10 @@
 
 constexpr size_t hwSupportedPotNum = 6;
 
+#include "CommonUtil.hpp"
 #include "FlowerPot.hpp"
 #include "Sensor.hpp"
 #include "Menu.hpp"
-#include "CommonUtil.hpp"
 
 #if defined KITCHEN
 
