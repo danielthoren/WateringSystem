@@ -1,8 +1,14 @@
 #ifndef MENU
 #define MENU
 
-#include "MenuLib.hpp"
+#include "MenuLib/MenuItemBase.hpp"
+#include "MenuLib/MenuItemList.hpp"
+#include "MenuLib/MenuItemText.hpp"
+#include "MenuLib/Menu.hpp"
+
 #include "MoistureLevelScreen.hpp"
+
+using namespace MenuLib;
 
 /*******************************************************************************
  ***                            Pot settings menu                             ***
@@ -63,22 +69,15 @@ MoistureLevelScreen moistureScreen{};
 
 Menu menu{&moistureScreen};
 
-void MenuSetup(Array<FlowerPot> pots) {
+void MenuSetup(Array<FlowerPot> pots)
+{
   moistureScreen = MoistureLevelScreen{pots, &potsMenuItemList};
   menu.init();
 }
 
-void MenuLoop() {
-
+void MenuLoop()
+{
   menu.update();
-
-  // uint8_t rotation = encoder.rotate();
-  // if (rotation == 2)
-  //   moistureScreen.up();
-  // else if (rotation == 1)
-  //   moistureScreen.down();
-
-  // moistureScreen.update();
 }
 
 #endif

@@ -3,7 +3,15 @@
 
 #include "FlowerPot.hpp"
 #include "Sensor.hpp"
-#include "MenuLib.hpp"
+#include "CommonUtil.hpp"
+
+#include "MenuLib/DisplayAdapter.hpp"
+#include "MenuLib/MenuItemBase.hpp"
+#include "MenuLib/common.hpp"
+
+using MenuLib::MenuItemBase;
+using MenuLib::DisplayAdapter;
+using MenuLib::InputEvent;
 
 class MoistureLevelScreen : public MenuItemBase
 {
