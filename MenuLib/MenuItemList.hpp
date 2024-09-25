@@ -88,7 +88,7 @@ public:
     }
 
     uint8_t botItemIndex = m_topItemIndex + LCD_ROWS - 1;
-    if (botItemIndex < (m_items.size()))
+    if (botItemIndex < (m_items.size() - 1))
     {
       display.setCursor(LCD_COLS - 1, LCD_ROWS - 1);
       display.printDownIndicator();
