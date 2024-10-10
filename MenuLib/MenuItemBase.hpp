@@ -12,7 +12,7 @@ class MenuItemBase
 public:
   virtual ~MenuItemBase() = default;
 
-  virtual void init() {}
+  virtual void init() { m_initialized = true; }
 
   virtual MenuItemBase* handleInput(InputEvent event) { return m_parent; };
   virtual void update() {}
@@ -32,6 +32,7 @@ public:
 
 protected:
   MenuItemBase* m_parent;
+  bool m_initialized{false};
 };
 
 }

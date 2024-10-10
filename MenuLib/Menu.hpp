@@ -25,8 +25,8 @@ public:
   void init()
   {
     m_display.init();
-    update(true);
     m_currentItem->init();
+    update(true);
   }
 
   void update(bool forceRedraw = false)
@@ -51,9 +51,13 @@ public:
       event = InputEvent::Up;
     }
 
-    if (event != InputEvent::None || forceRedraw)
+    if (event != InputEvent::None)
     {
       m_currentItem = m_currentItem->handleInput(event);
+      m_currentItem->draw(m_display);
+    }
+    else if (forceRedraw)
+    {
       m_currentItem->draw(m_display);
     }
   }

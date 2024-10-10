@@ -8,7 +8,6 @@ constexpr size_t hwSupportedPotNum = 6;
 #include "CommonUtil.hpp"
 #include "FlowerPot.hpp"
 #include "Sensor.hpp"
-#include "Menu.hpp"
 
 #if defined KITCHEN
 
@@ -46,12 +45,14 @@ constexpr uint8_t motorPins[] = {12, 11, 10, 9, 8, 7};
 FlowerPot potData[numPots];
 Array<FlowerPot> pots{potData, numPots};
 
+// TODO: Fix a way to get the pots to the menu system
+#include "Menu.hpp"
+
 void setup()
 {
-  MenuSetup(pots);
-
   ASSERT(numPots <= hwSupportedPotNum, "HW supported pot number exceeded");
   Serial.begin(9600);
+
   double alpha = 1;
 
   for (size_t i{0}; i < numPots; ++i)
@@ -167,6 +168,8 @@ void setup()
     };
 
 #endif
+
+  MenuSetup(pots);
 }
 
 constexpr unsigned long sensorPrintTimeout = FlowerPot::m_idleWaittimeMs;

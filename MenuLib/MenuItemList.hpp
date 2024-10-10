@@ -21,6 +21,7 @@ public:
   {
     for (MenuItemList* item : m_items)
     {
+      ASSERT(item != nullptr, "item may not be null");
       item->setParent(this);
       item->init();
     }
@@ -77,7 +78,9 @@ public:
       }
       else
       {
-        display.print(m_items[currItem]->getTextLabel());
+        char* pTextLabel = m_items[currItem]->getTextLabel();
+        ASSERT(pTextLabel != nullptr, "pTextLabel may not be null");
+        display.print(pTextLabel);
       }
     }
 

@@ -8,16 +8,25 @@
 class ISensor
 {
 public:
+  static constexpr unsigned m_analogReadMaxValue = 1024;
+
   ISensor() = default;
   virtual ~ISensor() = default;
 
-  virtual bool isTriggered() const = 0;
   virtual void sample() = 0;
+
+  virtual bool isTriggered() const = 0;
+  bool isInitialized() const { return m_initialized; }
 
   virtual unsigned getPercentageValue() const = 0;
   virtual unsigned getRawValue() const = 0;
 
-  bool isInitialized() const { return m_initialized; }
+  virtual uint8_t getTriggerThreshold() const = 0;
+  virtual void setTriggerThreshold(uint8_t threshold) = 0;
+
+  virtual unsigned getMinValue() const = 0;
+  virtual unsigned getMaxValue() const = 0;
+  // virtual void setMinMaxValues(unsigned minValue, unsigned maxValue) = 0;
 
 protected:
   bool m_initialized{false};
@@ -117,11 +126,39 @@ public:
     return m_filter.getValue();
   }
 
-  void setTriggerThreshold(uint8_t threshold)
+  virtual uint8_t getTriggerThreshold() const override
+  {
+    return m_lowerTriggerThresholdPercent;
+  }
+
+  void setTriggerThreshold(uint8_t threshold) override
   {
     ASSERT(isInitialized(), "Sensor not initialized!");
+    ASSERT(0 < threshold && threshold < 100, "Threshold must be in the interval 0 < threshold < 100");
+
     m_lowerTriggerThresholdPercent = threshold;
   }
+
+  virtual unsigned getMinValue() const override
+  {
+    return m_minSensorRange;
+  }
+
+  virtual unsigned getMaxValue() const override
+  {
+    return m_maxSensorRange;
+  }
+
+  // void setMinMaxValues(unsigned minValue, unsigned maxValue) override
+  // {
+  //   ASSERT(isInitialized(), "Sensor not initialized!");
+  //   ASSERT(minValue < m_analogReadMaxValue && maxValue < m_analogReadMaxValue,
+  //          "Values must be less than max analogRead value!");
+  //   ASSERT(minValue < maxValue, "minValue must be less than maxValue!");
+
+  //   m_minSensorRange = minValue;
+  //   m_maxSensorRange = maxValue;
+  // }
 
 private:
 
