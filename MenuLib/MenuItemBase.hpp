@@ -3,6 +3,7 @@
 
 #include "common.hpp"
 #include "DisplayAdapter.hpp"
+#include "String.hpp"
 
 namespace MenuLib
 {
@@ -18,7 +19,7 @@ public:
   virtual void update() {}
 
   virtual void draw(DisplayAdapter& display) {}
-  virtual char const* getTextLabel() = 0;
+  virtual IString const* getTextLabel() const = 0;
 
   MenuItemBase* getParent() const
   {

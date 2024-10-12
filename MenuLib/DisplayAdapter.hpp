@@ -2,7 +2,7 @@
 #define MENU_LIB_DISPLAY_ADAPTER
 
 #include <LiquidCrystal_I2C.h>
-#include "common.hpp"
+#include "String.hpp"
 
 namespace MenuLib
 {
@@ -54,7 +54,6 @@ public:
     lcd.createChar(downArrow, downArrowMap);
   }
 
-
   void clear()
   {
     lcd.clear();
@@ -66,7 +65,14 @@ public:
     lcd.setCursor(col, row);
   }
 
-  void print(const String& text) { lcd.print(text); }
+  void print(char const* text) { lcd.printstr(text); }
+  void print(const IString& textStr)
+  {
+    for (uint8_t i{0}; i < textStr.size() && textStr[i] != '\0'; ++i)
+    {
+      lcd.write(textStr[i]);
+    }
+  }
 
   void printDownIndicator() { lcd.write(downArrow); }
   void printUpIndicator  () { lcd.write(upArrow); }

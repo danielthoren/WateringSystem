@@ -3,6 +3,7 @@
 
 #include "MenuItemBase.hpp"
 #include "DisplayAdapter.hpp"
+#include "String.hpp"
 
 namespace MenuLib
 {
@@ -10,7 +11,7 @@ namespace MenuLib
 class MenuItemEditField : public MenuItemBase
 {
 public:
-  MenuItemEditField(char const* pFormatStr,
+  MenuItemEditField(IString const* pFormatStr,
 					uint8_t* pValue,
 					uint8_t stepSize,
 					uint8_t minVal,
@@ -51,16 +52,21 @@ public:
     m_parent->draw(display);
   }
 
-  virtual char const* getTextLabel() override
+  virtual IString const* getTextLabel() const override
   {
-	snprintf(m_label, LCD_COLS, m_pFormatStr, *m_pValue);
-    return reinterpret_cast<char const*>(m_label);
+    char formatStrCpy[LCD_COLS];
+    m_pFormatStr->getCopy(formatStrCpy, LCD_COLS);
+
+	snprintf(m_labelStr.getRaw(), LCD_COLS, formatStrCpy, *m_pValue);
+    return reinterpret_cast<IString const*>(&m_labelStr);
   }
 
 protected:
 
-  char const* m_pFormatStr{nullptr};
+  IString const* m_pFormatStr{nullptr};
   char m_label[LCD_COLS];
+  RamString m_labelStr{m_label, LCD_COLS};
+
   uint8_t* m_pValue{nullptr};
   uint8_t m_stepSize;
   uint8_t m_minVal;

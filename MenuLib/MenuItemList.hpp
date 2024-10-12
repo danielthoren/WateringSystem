@@ -3,6 +3,8 @@
 
 #include "MenuItemBase.hpp"
 #include "DisplayAdapter.hpp"
+#include "common.hpp"
+#include "String.hpp"
 
 #include "../CommonUtil.hpp"
 
@@ -12,9 +14,10 @@ namespace MenuLib
 class MenuItemList : public MenuItemBase
 {
 public:
-  MenuItemList(char* textLabel, Array<MenuItemBase*> items)
+  MenuItemList(IString* textLabel, Array<MenuItemBase*> items, bool useUpDownIndicators = false)
     : m_items{items},
-      m_textLabel{textLabel}
+      m_textLabel{textLabel},
+      m_useUpDownIndicators{useUpDownIndicators}
   {}
 
   void init() override
@@ -78,29 +81,21 @@ public:
       }
       else
       {
-        char* pTextLabel = m_items[currItem]->getTextLabel();
+        IString* pTextLabel = m_items[currItem]->getTextLabel();
         ASSERT(pTextLabel != nullptr, "pTextLabel may not be null");
-        display.print(pTextLabel);
+        display.print(*pTextLabel);
       }
     }
 
-    if (-1 < m_topItemIndex)
+    if (m_useUpDownIndicators)
     {
-      display.setCursor(LCD_COLS - 1, 0);
-      display.printUpIndicator();
-    }
-
-    uint8_t botItemIndex = m_topItemIndex + LCD_ROWS - 1;
-    if (botItemIndex < (m_items.size() - 1))
-    {
-      display.setCursor(LCD_COLS - 1, LCD_ROWS - 1);
-      display.printDownIndicator();
+      printUpDownIndicators(display);
     }
   }
 
-  virtual char const* getTextLabel() override
+  virtual IString const* getTextLabel() const override
   {
-    return reinterpret_cast<char const*>(m_textLabel);
+    return reinterpret_cast<IString const*>(m_textLabel);
   }
 
 private:
@@ -124,9 +119,26 @@ private:
     }
   }
 
+  void printUpDownIndicators(DisplayAdapter& display)
+  {
+    if (-1 < m_topItemIndex)
+    {
+      display.setCursor(LCD_COLS - 1, 0);
+      display.printUpIndicator();
+    }
+
+    uint8_t botItemIndex = m_topItemIndex + LCD_ROWS - 1;
+    if (botItemIndex < (m_items.size() - 1))
+    {
+      display.setCursor(LCD_COLS - 1, LCD_ROWS - 1);
+      display.printDownIndicator();
+    }
+  }
+
   int8_t m_topItemIndex{0};
   int8_t m_activeItemIndex{0};
-  char* m_textLabel;
+  IString* m_textLabel;
+  bool m_useUpDownIndicators{false};
 
   Array<MenuItemBase*> m_items;
 };

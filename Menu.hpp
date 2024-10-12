@@ -7,9 +7,12 @@
 #include "MenuLib/MenuItemEditField.hpp"
 #include "MenuLib/MenuItemCallback.hpp"
 #include "MenuLib/Menu.hpp"
+#include "MenuLib/common.hpp"
+#include "MenuLib/String.hpp"
+
+#include "CommonUtil.hpp"
 
 #include "MoistureLevelScreen.hpp"
-#include "CommonUtil.hpp"
 
 using namespace MenuLib;
 
@@ -17,11 +20,11 @@ class PotSensorTrigLevelItem : public MenuItemEditField
 {
 public:
   PotSensorTrigLevelItem()
-    : MenuItemEditField{m_formatStr, &m_triggerValue, step, minVal, maxVal}
+    : MenuItemEditField{&m_formatStr, &m_triggerValue, step, minVal, maxVal}
   {}
 
   PotSensorTrigLevelItem(ISensor* sensor)
-    : MenuItemEditField{m_formatStr, &m_triggerValue, step, minVal, maxVal},
+    : MenuItemEditField{&m_formatStr, &m_triggerValue, step, minVal, maxVal},
       m_sensor{sensor},
       m_initialized{true}
   {
@@ -47,7 +50,9 @@ private:
 
   bool m_initialized{false};
 
-  char m_formatStr[LCD_COLS] = "Trig level: %d%%";
+  char m_format[LCD_COLS] = "Trig level: %d%%";
+  RamString m_formatStr{m_format, sizeof(m_format)};
+
   static constexpr uint8_t step = 10;
   static constexpr uint8_t minVal = 10;
   static constexpr uint8_t maxVal = 90;
@@ -57,11 +62,11 @@ class PotMenu : public MenuItemList
 {
 public:
   PotMenu()
-    : MenuItemList{m_potMenuItemLabel, Array<MenuItemBase*>{m_topItems, 2}}
+    : MenuItemList{&m_potMenuItemLabelStr, Array<MenuItemBase*>{m_topItems, 2}}
   {}
 
   PotMenu(FlowerPot* pot, uint8_t potNum)
-    : MenuItemList{m_potMenuItemLabel, Array<MenuItemBase*>{m_topItems, 2}},
+    : MenuItemList{&m_potMenuItemLabelStr, Array<MenuItemBase*>{m_topItems, 2}},
       m_pot{pot},
       m_potNum{potNum},
       m_initialized{true},
@@ -69,7 +74,7 @@ public:
   {
     ASSERT(m_pot != nullptr, "m_pot may not be null!");
 
-    snprintf(static_cast<char*>(m_potMenuItemLabel), LCD_COLS, "Pot: %u", potNum);
+    snprintf(static_cast<char*>(m_potMenuItemLabel), LCD_COLS, "Pot %u", potNum);
   }
 
 private:
@@ -81,11 +86,13 @@ private:
 
   PotSensorTrigLevelItem m_trigLevel{};
 
-  char m_sensorMaxValText[LCD_COLS] = "Max val: %d";
-  MenuItemText m_sensorMaxVal{m_sensorMaxValText};
+  char m_sensorMaxValLabel[LCD_COLS] = "Max val: %d";
+  RamString m_sensorMaxValLabelStr{m_sensorMaxValLabel, sizeof(m_sensorMaxValLabel)};
+  MenuItemText m_sensorMaxVal{&m_sensorMaxValLabelStr};
 
-  char m_sensorMinValText[LCD_COLS] = "Min val: %d";
-  MenuItemText m_sensorMinVal{m_sensorMinValText};
+  char m_sensorMinValLabel[LCD_COLS] = "Min val: %d";
+  RamString m_sensorMinValLabelStr{m_sensorMinValLabel, sizeof(m_sensorMinValLabel)};
+  MenuItemText m_sensorMinVal{&m_sensorMinValLabelStr};
 
   MenuItemBase* m_sensorItems[3] = {
     dynamic_cast<MenuItemBase*>(&m_trigLevel),
@@ -94,12 +101,13 @@ private:
   };
 
   char m_sensorMenuLabel[LCD_COLS] = "Sensor";
-  MenuItemList m_sensorMenu{m_sensorMenuLabel, Array<MenuItemBase*>{m_sensorItems, 3}};
+  RamString m_sensorMenuLabelStr{m_sensorMenuLabel, sizeof(m_sensorMenuLabel)};
+  MenuItemList m_sensorMenu{&m_sensorMenuLabelStr, Array<MenuItemBase*>{m_sensorItems, 3}};
 
   /************************ Motor menu ************************/
 
-  // char m_motorRunTimeText[LCD_COLS] = "Run time: %d";
-  // MenuItemText m_motorRunTime{m_motorRunTimeText};
+  // char m_motorRunTimeLabel[LCD_COLS] = "Run time: %d";
+  // MenuItemText m_motorRunTime{m_motorRunTimeLabel};
 
   // MenuItemBase* m_motorItems[1] = {
   //   dynamic_cast<MenuItemBase*>(&m_motorRunTime)
@@ -116,7 +124,8 @@ private:
     // dynamic_cast<MenuItemBase*>(&m_motorMenu)
   };
 
-  char m_potMenuItemLabel[LCD_COLS] = "Pot x";
+  char m_potMenuItemLabel[LCD_COLS];
+  RamString m_potMenuItemLabelStr{m_potMenuItemLabel, LCD_COLS};
 };
 
 /*******************************************************************************
@@ -129,53 +138,56 @@ private:
 
 PotMenu pot1Menu;
 
-char sensorConfLabel[] = "Sensor config";
-MenuItemText sensorConfMenu{sensorConfLabel};
+// char sensorConfLabel[] = "Sensor config";
+// MenuItemText sensorConfMenu{sensorConfLabel};
 
-char motorConfLabel[] = "Motor config";
-MenuItemText motorConfMenu{ motorConfLabel};
+// char motorConfLabel[] = "Motor config";
+// MenuItemText motorConfMenu{ motorConfLabel};
 
-MenuItemBase* pot1MenuItems[2] = {
-  dynamic_cast<MenuItemBase*>(&sensorConfMenu),
-  dynamic_cast<MenuItemBase*>(&motorConfMenu)
-};
+// MenuItemBase* pot1MenuItems[2] = {
+//   dynamic_cast<MenuItemBase*>(&sensorConfMenu),
+//   dynamic_cast<MenuItemBase*>(&motorConfMenu)
+// };
 
-Array<MenuItemBase*> pot1MenuItemsArr{pot1MenuItems, 2};
-char pot1MenuLabel[] = "Pot 1";
-MenuItemList pot1MenuList = {pot1MenuLabel, pot1MenuItemsArr};
+// Array<MenuItemBase*> pot1MenuItemsArr{pot1MenuItems, 2};
+// char pot1MenuLabel[] = "Pot 1";
+// MenuItemList pot1MenuList = {pot1MenuLabel, pot1MenuItemsArr};
 
 /**************************************************
  ***  Pots menu                                  ***
  **************************************************/
 
 char potLabel2[] = "Pot 2";
-MenuItemText potMenuItem2{potLabel2};
+RamString potLabel2Str{potLabel2, sizeof(potLabel2)};
+MenuItemText potMenuItem2{&potLabel2Str};
 
 char potLabel3[] = "Pot 3";
-MenuItemText potMenuItem3{potLabel3};
+RamString potLabel3Str{potLabel3, sizeof(potLabel3)};
+MenuItemText potMenuItem3{&potLabel3Str};
 
-char potLabel4[] = "Pot 4";
-MenuItemText potMenuItem4{potLabel4};
+// char potLabel4[] = "Pot 4";
+// MenuItemText potMenuItem4{potLabel4};
 
-char potLabel5[] = "Pot 5";
-MenuItemText potMenuItem5{potLabel5};
+// char potLabel5[] = "Pot 5";
+// MenuItemText potMenuItem5{potLabel5};
 
-char potLabel6[] = "Pot 6";
-MenuItemText potMenuItem6{potLabel6};
+// char potLabel6[] = "Pot 6";
+// MenuItemText potMenuItem6{potLabel6};
 
 MenuItemBase* potsMenuItems[] = {
   /* dynamic_cast<MenuItemBase*>(&pot1MenuList), */
   dynamic_cast<MenuItemBase*>(&pot1Menu),
   dynamic_cast<MenuItemBase*>(&potMenuItem2),
-  dynamic_cast<MenuItemBase*>(&potMenuItem3),
-  dynamic_cast<MenuItemBase*>(&potMenuItem4),
-  dynamic_cast<MenuItemBase*>(&potMenuItem5),
-  dynamic_cast<MenuItemBase*>(&potMenuItem6),
+  dynamic_cast<MenuItemBase*>(&potMenuItem3)
+  // dynamic_cast<MenuItemBase*>(&potMenuItem4),
+  // dynamic_cast<MenuItemBase*>(&potMenuItem5),
+  // dynamic_cast<MenuItemBase*>(&potMenuItem6),
 };
 
-Array<MenuItemBase*> potsMenuItemsArr{potsMenuItems, 6};
+Array<MenuItemBase*> potsMenuItemsArr{potsMenuItems, 3};
 char potsMenuLabel[] = "Pot settings";
-MenuItemList potsMenuItemList = {potsMenuLabel, potsMenuItemsArr};
+RamString potsMenuLabelStr{potsMenuLabel, sizeof(potsMenuLabel)};
+MenuItemList potsMenuItemList{&potsMenuLabelStr, potsMenuItemsArr};
 
 MoistureLevelScreen moistureScreen{};
 
@@ -187,9 +199,7 @@ void MenuSetup(Array<FlowerPot> pots)
 
   pot1Menu = PotMenu{&pots[0], 1};
 
-  Serial.println("before menu init");
   menu.init();
-  Serial.println("MenuSetup");
 }
 
 void MenuLoop()

@@ -8,10 +8,12 @@
 #include "MenuLib/DisplayAdapter.hpp"
 #include "MenuLib/MenuItemBase.hpp"
 #include "MenuLib/common.hpp"
+#include "MenuLib/String.hpp"
 
 using MenuLib::MenuItemBase;
 using MenuLib::DisplayAdapter;
 using MenuLib::InputEvent;
+using MenuLib::IString;
 
 class MoistureLevelScreen : public MenuItemBase
 {
@@ -55,17 +57,15 @@ public:
     return dynamic_cast<MenuItemBase*>(this);
   }
 
-  void draw(DisplayAdapter& display) override
+  void draw(MenuLib::DisplayAdapter& display) override
   {
     ASSERT(m_initialized, "Not m_initialized");
 
     m_display = &display;
 
-    m_changed = false;
-
-    char row1[LCD_COLS + 1];
-    char row2[LCD_COLS + 1];
-    char row3[LCD_COLS + 1];
+    char row1[LCD_COLS + 1] = {0};
+    char row2[LCD_COLS + 1] = {0};
+    char row3[LCD_COLS + 1] = {0};
 
     char* potRows[] = {row1, row2, row3};
 
@@ -75,12 +75,13 @@ public:
 
     display.clear();
     display.setCursor(0, 0);
-
     display.print(potRows[m_topRow]);
 
-    display.setCursor(0, 1);
-
-    display.print(potRows[m_topRow + 1]);
+    if (m_topRow + 1 < 3)
+    {
+      display.setCursor(0, 1);
+      display.print(potRows[m_topRow + 1]);
+    }
   }
 
   void update() override
@@ -91,8 +92,9 @@ public:
     }
   }
 
-  char const* getTextLabel()
+  IString const* getTextLabel() const override
   {
+    ASSERT(false, "getTextLabel shall not be called on this type");
     return nullptr;
   }
 
@@ -130,19 +132,15 @@ private:
 
   bool hasChanged()
   {
-    if (m_changed)
-      return m_changed;
-
     for (uint8_t i = 0; i < m_pots.size(); i++)
     {
       if (m_pots[i].isInitialized() &&
           m_pots[i].getSensor()->getPercentageValue() != m_displayedValues[i])
       {
-        m_changed = true;
-        break;
+        return true;
       }
     }
-    return m_changed;
+    return false;
   }
 
   void up()
@@ -151,7 +149,6 @@ private:
     if (newTopRow != m_topRow)
     {
       m_topRow = newTopRow;
-      m_changed = true;
     }
   }
 
@@ -161,14 +158,12 @@ private:
                             m_numPotTextRows - (LCD_ROWS - (m_numPotTextRows % LCD_ROWS)));
     if (newTopRow != m_topRow)
     {
-      m_changed = true;
       m_topRow = newTopRow;
     }
   }
 
   uint8_t m_topRow{0};
   bool m_initialized{false};
-  bool m_changed{true};
   Array<FlowerPot> m_pots;
   uint8_t m_numPotTextRows;
   unsigned m_displayedValues[hwSupportedPotNum];

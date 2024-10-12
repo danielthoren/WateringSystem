@@ -8,6 +8,7 @@ constexpr size_t hwSupportedPotNum = 6;
 #include "CommonUtil.hpp"
 #include "FlowerPot.hpp"
 #include "Sensor.hpp"
+#include "Menu.hpp"
 
 #if defined KITCHEN
 
@@ -44,9 +45,6 @@ constexpr uint8_t motorPins[] = {12, 11, 10, 9, 8, 7};
 
 FlowerPot potData[numPots];
 Array<FlowerPot> pots{potData, numPots};
-
-// TODO: Fix a way to get the pots to the menu system
-#include "Menu.hpp"
 
 void setup()
 {
@@ -179,23 +177,23 @@ void loop()
 {
   MenuLoop();
 
-  /* for (size_t i{0}; i < numPots; ++i) */
-  /* { */
-  /*   pots[i].update(); */
+  for (size_t i{0}; i < numPots; ++i)
+  {
+    pots[i].update();
 
-  /*   if (millis() - lastSensorPrintTime > sensorPrintTimeout) */
-  /*   { */
-  /*     lastSensorPrintTime = millis(); */
+    if (millis() - lastSensorPrintTime > sensorPrintTimeout)
+    {
+      lastSensorPrintTime = millis();
 
-  /*     for (size_t i{0}; i < numPots; ++i) */
-  /*     { */
-  /*       Serial.print(" { "); */
-  /*       Serial.print(sensors[i].getPercentageValue()); */
-  /*       Serial.print(" : "); */
-  /*       Serial.print(sensors[i].getRawValue()); */
-  /*       Serial.print(" } "); */
-  /*     } */
-  /*     Serial.println(""); */
-  /*   } */
-  /* } */
+      /* for (size_t i{0}; i < numPots; ++i) */
+      /* { */
+      /*   Serial.print(" { "); */
+      /*   Serial.print(sensors[i].getPercentageValue()); */
+      /*   Serial.print(" : "); */
+      /*   Serial.print(sensors[i].getRawValue()); */
+      /*   Serial.print(" } "); */
+      /* } */
+      /* Serial.println(""); */
+    }
+  }
 }

@@ -3,6 +3,7 @@
 
 #include "MenuItemBase.hpp"
 #include "DisplayAdapter.hpp"
+#include "String.hpp"
 
 namespace MenuLib
 {
@@ -10,19 +11,19 @@ namespace MenuLib
 class MenuItemText : public MenuItemBase
 {
 public:
-  MenuItemText(char* textLabel)
+  MenuItemText(IString* textLabel)
     : m_textLabel{textLabel}
   {
     ASSERT(m_textLabel != nullptr, "m_textLabel may not be null!");
   }
 
-  virtual char const* getTextLabel() override
+  virtual IString const* getTextLabel() const override
   {
-    return reinterpret_cast<char const*>(m_textLabel);
+    return reinterpret_cast<IString const*>(m_textLabel);
   }
 
 protected:
-  char* m_textLabel{nullptr};
+  IString* m_textLabel{nullptr};
 };
 
 }
