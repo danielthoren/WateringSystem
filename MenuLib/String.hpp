@@ -1,6 +1,8 @@
 #ifndef MENU_LIB_STRING
 #define MENU_LIB_STRING
 
+#include <avr/pgmspace.h>
+
 namespace MenuLib
 {
 
@@ -72,11 +74,26 @@ private:
   char* m_pStr{nullptr};
 };
 
-#define MAKE_RAM_STRING(name, str, size)        \
-  do {                                          \
-    char str_#name[size] = str;                 \
-    RamString name{str_#name, size};            \
-  } while(0)
+class ProgMemString : public IString
+{
+public:
+  ProgMemString(char* pStr, uint8_t size)
+    : IString{size},
+      m_pStr{pStr}
+  {}
+
+  char operator[](uint8_t index) const override
+  {
+    ASSERT(m_pStr != nullptr, "m_pStr may not be null");
+    ASSERT(index < m_size, "Index out of range");
+
+    return pgm_read_byte(&(m_pStr[index]));
+  }
+
+private:
+
+  char* m_pStr{nullptr};
+};
 
 }
 
