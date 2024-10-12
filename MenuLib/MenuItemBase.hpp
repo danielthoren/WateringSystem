@@ -11,11 +11,24 @@ namespace MenuLib
 class MenuItemBase
 {
 public:
+  MenuItemBase(MenuItemBase* m_child = nullptr)
+    : m_parent{nullptr},
+    m_child{m_child}
+  {}
+
   virtual ~MenuItemBase() = default;
 
   virtual void init() { m_initialized = true; }
 
-  virtual MenuItemBase* handleInput(InputEvent event) { return m_parent; };
+  virtual MenuItemBase* handleInput(InputEvent event)
+  {
+    if (event == InputEvent::Enter && m_child != nullptr)
+    {
+      return m_child;
+    }
+    return m_parent;
+  }
+
   virtual void update() {}
 
   virtual void draw(DisplayAdapter& display) {}
@@ -32,7 +45,8 @@ public:
   }
 
 protected:
-  MenuItemBase* m_parent;
+  MenuItemBase* m_parent{nullptr};
+  MenuItemBase* m_child{nullptr};
   bool m_initialized{false};
 };
 

@@ -26,7 +26,7 @@ public:
 
   virtual unsigned getMinValue() const = 0;
   virtual unsigned getMaxValue() const = 0;
-  // virtual void setMinMaxValues(unsigned minValue, unsigned maxValue) = 0;
+  virtual void setMinMaxValues(unsigned minValue, unsigned maxValue) = 0;
 
 protected:
   bool m_initialized{false};
@@ -149,16 +149,16 @@ public:
     return m_maxSensorRange;
   }
 
-  // void setMinMaxValues(unsigned minValue, unsigned maxValue) override
-  // {
-  //   ASSERT(isInitialized(), "Sensor not initialized!");
-  //   ASSERT(minValue < m_analogReadMaxValue && maxValue < m_analogReadMaxValue,
-  //          "Values must be less than max analogRead value!");
-  //   ASSERT(minValue < maxValue, "minValue must be less than maxValue!");
+  void setMinMaxValues(unsigned minValue, unsigned maxValue) override
+  {
+    ASSERT(isInitialized(), "Sensor not initialized!");
+    ASSERT(minValue < m_analogReadMaxValue && maxValue < m_analogReadMaxValue,
+           "Values must be less than max analogRead value!");
+    ASSERT(minValue < maxValue, "minValue must be less than maxValue!");
 
-  //   m_minSensorRange = minValue;
-  //   m_maxSensorRange = maxValue;
-  // }
+    m_minSensorRange = minValue;
+    m_maxSensorRange = maxValue;
+  }
 
 private:
 

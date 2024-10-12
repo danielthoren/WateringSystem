@@ -50,13 +50,15 @@ private:
 
   bool m_initialized{false};
 
-  char m_format[LCD_COLS] = "Trig level: %d%%";
+  static char const m_format[LCD_COLS] PROGMEM;
   RamString m_formatStr{m_format, sizeof(m_format)};
 
   static constexpr uint8_t step = 10;
   static constexpr uint8_t minVal = 10;
   static constexpr uint8_t maxVal = 90;
 };
+
+char const PotSensorTrigLevelItem::m_format[LCD_COLS] PROGMEM = "Trig level: %d%%";
 
 class PotMenu : public MenuItemList
 {
@@ -86,12 +88,12 @@ private:
 
   PotSensorTrigLevelItem m_trigLevel{};
 
-  char m_sensorMaxValLabel[LCD_COLS] = "Max val: %d";
-  RamString m_sensorMaxValLabelStr{m_sensorMaxValLabel, sizeof(m_sensorMaxValLabel)};
+  static char const m_sensorMaxValLabel[LCD_COLS] PROGMEM;
+  ProgMemString m_sensorMaxValLabelStr{m_sensorMaxValLabel, sizeof(m_sensorMaxValLabel)};
   MenuItemText m_sensorMaxVal{&m_sensorMaxValLabelStr};
 
-  char m_sensorMinValLabel[LCD_COLS] = "Min val: %d";
-  RamString m_sensorMinValLabelStr{m_sensorMinValLabel, sizeof(m_sensorMinValLabel)};
+  static char const m_sensorMinValLabel[LCD_COLS] PROGMEM;
+  ProgMemString m_sensorMinValLabelStr{m_sensorMinValLabel, sizeof(m_sensorMinValLabel)};
   MenuItemText m_sensorMinVal{&m_sensorMinValLabelStr};
 
   MenuItemBase* m_sensorItems[3] = {
@@ -100,8 +102,8 @@ private:
     dynamic_cast<MenuItemBase*>(&m_sensorMinVal)
   };
 
-  char m_sensorMenuLabel[LCD_COLS] = "Sensor";
-  RamString m_sensorMenuLabelStr{m_sensorMenuLabel, sizeof(m_sensorMenuLabel)};
+  static char const m_sensorMenuLabel[LCD_COLS] PROGMEM;
+  ProgMemString m_sensorMenuLabelStr{m_sensorMenuLabel, sizeof(m_sensorMenuLabel)};
   MenuItemList m_sensorMenu{&m_sensorMenuLabelStr, Array<MenuItemBase*>{m_sensorItems, 3}};
 
   /************************ Motor menu ************************/
@@ -127,6 +129,11 @@ private:
   char m_potMenuItemLabel[LCD_COLS];
   RamString m_potMenuItemLabelStr{m_potMenuItemLabel, LCD_COLS};
 };
+
+char const PotMenu::m_sensorMaxValLabel[LCD_COLS] PROGMEM = "Max val: %d";
+char const PotMenu::m_sensorMinValLabel[LCD_COLS] PROGMEM = "Min val: %d";
+char const PotMenu::m_sensorMenuLabel[LCD_COLS] PROGMEM = "Sensor";
+
 
 /*******************************************************************************
  ***                            Pot settings menu                             ***
@@ -157,12 +164,12 @@ PotMenu pot1Menu;
  ***  Pots menu                                  ***
  **************************************************/
 
-char potLabel2[] = "Pot 2";
-RamString potLabel2Str{potLabel2, sizeof(potLabel2)};
+char const potLabel2[] PROGMEM = "Pot 2";
+ProgMemString potLabel2Str{potLabel2, sizeof(potLabel2)};
 MenuItemText potMenuItem2{&potLabel2Str};
 
-char potLabel3[] = "Pot 3";
-RamString potLabel3Str{potLabel3, sizeof(potLabel3)};
+char const potLabel3[] PROGMEM = "Pot 3";
+ProgMemString potLabel3Str{potLabel3, sizeof(potLabel3)};
 MenuItemText potMenuItem3{&potLabel3Str};
 
 // char potLabel4[] = "Pot 4";
@@ -185,8 +192,8 @@ MenuItemBase* potsMenuItems[] = {
 };
 
 Array<MenuItemBase*> potsMenuItemsArr{potsMenuItems, 3};
-char potsMenuLabel[] = "Pot settings";
-RamString potsMenuLabelStr{potsMenuLabel, sizeof(potsMenuLabel)};
+char const potsMenuLabel[] PROGMEM = "Pot settings";
+ProgMemString potsMenuLabelStr{potsMenuLabel, sizeof(potsMenuLabel)};
 MenuItemList potsMenuItemList{&potsMenuLabelStr, potsMenuItemsArr};
 
 MoistureLevelScreen moistureScreen{};
