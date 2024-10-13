@@ -38,7 +38,7 @@ constexpr uint8_t sensorPowerPin = 13;
 constexpr unsigned moistureThreshold = 40;
 
 constexpr uint8_t sensorPins[] = {A0, A1, A2, A3, A6, A7};
-ResistiveMoistureSensor sensors[numPots];
+Sensor sensors[numPots];
 
 // Flower pots
 constexpr uint8_t motorPins[] = {12, 11, 10, 9, 8, 7};

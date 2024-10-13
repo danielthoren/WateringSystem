@@ -68,10 +68,13 @@ public:
   void print(char const* text) { lcd.printstr(text); }
   void print(const IString& textStr)
   {
+    Serial.print("print label: ");
     for (uint8_t i{0}; i < textStr.size() && textStr[i] != '\0'; ++i)
     {
+      Serial.print(textStr[i]);
       lcd.write(textStr[i]);
     }
+    Serial.println("");
   }
 
   void printDownIndicator() { lcd.write(downArrow); }

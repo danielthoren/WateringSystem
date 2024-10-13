@@ -20,8 +20,10 @@ public:
       m_useUpDownIndicators{useUpDownIndicators}
   {}
 
-  void init() override
+  virtual void init() override
   {
+    MenuItemBase::init();
+
     for (MenuItemList* item : m_items)
     {
       ASSERT(item != nullptr, "item may not be null");
@@ -79,7 +81,7 @@ public:
       {
         display.print("..");
       }
-      else
+      else if (currItem < m_items.size())
       {
         IString* pTextLabel = m_items[currItem]->getTextLabel();
         ASSERT(pTextLabel != nullptr, "pTextLabel may not be null");

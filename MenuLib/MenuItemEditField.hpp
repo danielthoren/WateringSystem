@@ -17,11 +17,17 @@ public:
 					uint8_t minVal,
 					uint8_t maxVal)
     : m_pFormatStr{pFormatStr},
+      m_labelStr{m_label, LCD_COLS},
 	  m_pValue{pValue},
 	  m_stepSize{stepSize},
 	  m_minVal{minVal},
 	  m_maxVal{maxVal}
+  {}
+
+  virtual void init() override
   {
+    MenuItemBase::init();
+
     ASSERT(m_pFormatStr != nullptr, "m_textLabel may not be null!");
     ASSERT(m_pValue != nullptr, "m_textLabel may not be null!");
   }
@@ -56,16 +62,18 @@ public:
   {
     char formatStrCpy[LCD_COLS];
     m_pFormatStr->getCopy(formatStrCpy, LCD_COLS);
+	snprintf(m_label, LCD_COLS, formatStrCpy, *m_pValue);
 
-	snprintf(m_labelStr.getRaw(), LCD_COLS, formatStrCpy, *m_pValue);
-    return reinterpret_cast<IString const*>(&m_labelStr);
+    m_labelStr = RamString{m_label, LCD_COLS};
+
+    return static_cast<IString const*>(&m_labelStr);
   }
 
 protected:
 
   IString const* m_pFormatStr{nullptr};
   char m_label[LCD_COLS];
-  RamString m_labelStr{m_label, LCD_COLS};
+  RamString m_labelStr;
 
   uint8_t* m_pValue{nullptr};
   uint8_t m_stepSize;

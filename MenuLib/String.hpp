@@ -71,7 +71,7 @@ public:
 
 private:
 
-  char* m_pStr{nullptr};
+  char* m_pStr;
 };
 
 class ProgMemString : public IString

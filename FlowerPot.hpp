@@ -48,7 +48,7 @@ public:
     m_waitTimeAfterWateringMs{}
   {}
 
-  FlowerPot(ISensor* pSensor,
+  FlowerPot(Sensor* pSensor,
             uint8_t motorPin,
             uint8_t motorSpeed,
             uint8_t wateringTime_sek,
@@ -129,7 +129,7 @@ public:
     }
   }
 
-  ISensor* getSensor() const
+  Sensor* getSensor() const
   {
     return m_pSensor;
   }
@@ -176,7 +176,7 @@ private:
       return State::WAITING;
   }
 
-  ISensor* m_pSensor;
+  Sensor* m_pSensor;
   uint8_t m_motorPin;
   uint8_t m_motorSpeed;
   unsigned long m_wateringTimeMs;

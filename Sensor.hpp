@@ -5,58 +5,37 @@
 #include "Filter.hpp"
 #include "CommonUtil.hpp"
 
-class ISensor
+class SensorMenu;
+
+class Sensor
 {
 public:
+  friend SensorMenu;
+
   static constexpr unsigned m_analogReadMaxValue = 1024;
 
-  ISensor() = default;
-  virtual ~ISensor() = default;
-
-  virtual void sample() = 0;
-
-  virtual bool isTriggered() const = 0;
-  bool isInitialized() const { return m_initialized; }
-
-  virtual unsigned getPercentageValue() const = 0;
-  virtual unsigned getRawValue() const = 0;
-
-  virtual uint8_t getTriggerThreshold() const = 0;
-  virtual void setTriggerThreshold(uint8_t threshold) = 0;
-
-  virtual unsigned getMinValue() const = 0;
-  virtual unsigned getMaxValue() const = 0;
-  virtual void setMinMaxValues(unsigned minValue, unsigned maxValue) = 0;
-
-protected:
-  bool m_initialized{false};
-};
-
-class ResistiveMoistureSensor : public ISensor
-{
-public:
-  ResistiveMoistureSensor() :
+  Sensor() :
     m_dataPin{},
     m_powerPin{},
     m_minSensorRange{},
     m_maxSensorRange{},
-    m_lowerTriggerThresholdPercent{},
+    m_triggerThresh{},
     m_invertTrigger{},
     m_filter{}
   {}
 
-  ResistiveMoistureSensor(uint8_t dataPin,
-                          uint8_t powerPin,
-                          unsigned minSensorRange,
-                          unsigned maxSensorRange,
-                          uint8_t lowerTriggerThresholdPercent,
-                          bool invertTrigger = false,
-                          double filterAlpha = 0.8) :
+  Sensor(uint8_t dataPin,
+         uint8_t powerPin,
+         unsigned minSensorRange,
+         unsigned maxSensorRange,
+         uint8_t lowerTriggerThresholdPercent,
+         bool invertTrigger = false,
+         double filterAlpha = 0.8) :
     m_dataPin{dataPin},
     m_powerPin{powerPin},
     m_minSensorRange{minSensorRange},
     m_maxSensorRange{maxSensorRange},
-    m_lowerTriggerThresholdPercent{lowerTriggerThresholdPercent},
+    m_triggerThresh{lowerTriggerThresholdPercent},
     m_invertTrigger{invertTrigger},
     m_filter{filterAlpha, static_cast<double>(maxSensorRange)}
   {
@@ -80,7 +59,9 @@ public:
     m_initialized = true;
   }
 
-  void sample() override
+  bool isInitialized() const { return m_initialized; }
+
+  void sample()
   {
     ASSERT(isInitialized(), "Sensor not initialized!");
 
@@ -99,18 +80,18 @@ public:
 #endif
   }
 
-  bool isTriggered() const override
+  bool isTriggered() const
   {
     ASSERT(isInitialized(), "Sensor not initialized!");
     unsigned sensorValue = getPercentageValue();
 
     if (m_invertTrigger)
-      return sensorValue >= m_lowerTriggerThresholdPercent;
+      return sensorValue >= m_triggerThresh;
     else
-      return sensorValue < m_lowerTriggerThresholdPercent;
+      return sensorValue < m_triggerThresh;
   }
 
-  unsigned getPercentageValue() const override
+  unsigned getPercentageValue() const
   {
     ASSERT(isInitialized(), "Sensor not initialized!");
     unsigned boundedValue = constrain(m_filter.getValue(),
@@ -120,36 +101,36 @@ public:
     return map(boundedValue, m_minSensorRange, m_maxSensorRange, 0, 100);
   }
 
-  unsigned getRawValue() const override
+  unsigned getRawValue() const
   {
     ASSERT(isInitialized(), "Sensor not initialized!");
     return m_filter.getValue();
   }
 
-  virtual uint8_t getTriggerThreshold() const override
+  virtual uint8_t getTriggerThreshold() const
   {
-    return m_lowerTriggerThresholdPercent;
+    return m_triggerThresh;
   }
 
-  void setTriggerThreshold(uint8_t threshold) override
+  void setTriggerThreshold(uint8_t threshold)
   {
     ASSERT(isInitialized(), "Sensor not initialized!");
     ASSERT(0 < threshold && threshold < 100, "Threshold must be in the interval 0 < threshold < 100");
 
-    m_lowerTriggerThresholdPercent = threshold;
+    m_triggerThresh = threshold;
   }
 
-  virtual unsigned getMinValue() const override
+  virtual unsigned getMinValue() const
   {
     return m_minSensorRange;
   }
 
-  virtual unsigned getMaxValue() const override
+  virtual unsigned getMaxValue() const
   {
     return m_maxSensorRange;
   }
 
-  void setMinMaxValues(unsigned minValue, unsigned maxValue) override
+  void setMinMaxValues(unsigned minValue, unsigned maxValue)
   {
     ASSERT(isInitialized(), "Sensor not initialized!");
     ASSERT(minValue < m_analogReadMaxValue && maxValue < m_analogReadMaxValue,
@@ -166,9 +147,11 @@ private:
   uint8_t m_powerPin;
   unsigned m_minSensorRange;
   unsigned m_maxSensorRange;
-  uint8_t m_lowerTriggerThresholdPercent;
+  uint8_t m_triggerThresh;
   bool m_invertTrigger;
   LowPassFilter<unsigned> m_filter;
+
+  bool m_initialized{false};
 };
 
 #endif
