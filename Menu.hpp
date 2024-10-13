@@ -16,63 +16,63 @@
 
 using namespace MenuLib;
 
-class PotSensorTrigLevelItem : public MenuItemEditField
-{
-public:
-  PotSensorTrigLevelItem()
-    : MenuItemEditField{&m_formatStr, &m_triggerValue, step, minVal, maxVal}
-  {}
+/* class PotSensorTrigLevelItem : public MenuItemEditField */
+/* { */
+/* public: */
+/*   PotSensorTrigLevelItem() */
+/*     : MenuItemEditField{&m_formatStr, &m_triggerValue, step, minVal, maxVal} */
+/*   {} */
 
-  PotSensorTrigLevelItem(ISensor* sensor)
-    : MenuItemEditField{&m_formatStr, &m_triggerValue, step, minVal, maxVal},
-      m_sensor{sensor},
-      m_initialized{true}
-  {
-    ASSERT(m_sensor != nullptr, "m_sensor may not be null!");
-    m_triggerValue = m_sensor->getTriggerThreshold();
-  }
+/*   PotSensorTrigLevelItem(Sensor* sensor) */
+/*     : MenuItemEditField{&m_formatStr, &m_triggerValue, step, minVal, maxVal}, */
+/*       m_sensor{sensor}, */
+/*       m_initialized{true} */
+/*   { */
+/*     ASSERT(m_sensor != nullptr, "m_sensor may not be null!"); */
+/*     m_triggerValue = m_sensor->getTriggerThreshold(); */
+/*   } */
 
-  virtual MenuItemBase* handleInput(InputEvent event) override
-  {
-    ASSERT(m_initialized, "PotSensorTrigLevelItem not initialized!");
+/*   virtual MenuItemBase* handleInput(InputEvent event) override */
+/*   { */
+/*     ASSERT(m_initialized, "PotSensorTrigLevelItem not initialized!"); */
 
-    if (event == InputEvent::Enter)
-    {
-      m_sensor->setTriggerThreshold(m_triggerValue);
-    }
+/*     if (event == InputEvent::Enter) */
+/*     { */
+/*       m_sensor->setTriggerThreshold(m_triggerValue); */
+/*     } */
 
-    return MenuItemEditField::handleInput(event);
-  }
+/*     return MenuItemEditField::handleInput(event); */
+/*   } */
 
-private:
-  ISensor* m_sensor{nullptr};
-  uint8_t m_triggerValue{};
+/* private: */
+/*   Sensor* m_sensor{nullptr}; */
+/*   uint8_t m_triggerValue{}; */
 
-  bool m_initialized{false};
+/*   bool m_initialized{false}; */
 
-  static char const m_format[LCD_COLS] PROGMEM;
-  RamString m_formatStr{m_format, sizeof(m_format)};
+/*   static char const m_format[LCD_COLS] PROGMEM; */
+/*   ProgMemString m_formatStr{m_format, sizeof(m_format)}; */
 
-  static constexpr uint8_t step = 10;
-  static constexpr uint8_t minVal = 10;
-  static constexpr uint8_t maxVal = 90;
-};
+/*   static constexpr uint8_t step = 10; */
+/*   static constexpr uint8_t minVal = 10; */
+/*   static constexpr uint8_t maxVal = 90; */
+/* }; */
 
-char const PotSensorTrigLevelItem::m_format[LCD_COLS] PROGMEM = "Trig level: %d%%";
+/* char const PotSensorTrigLevelItem::m_format[LCD_COLS] PROGMEM = "Trig level: %d%%"; */
 
 class PotMenu : public MenuItemList
 {
 public:
   PotMenu()
-    : MenuItemList{&m_potMenuItemLabelStr, Array<MenuItemBase*>{m_topItems, 2}}
+    : MenuItemList{&m_potMenuItemLabelStr, Array<MenuItemBase*>{m_topItems, 1}}
   {}
 
   PotMenu(FlowerPot* pot, uint8_t potNum)
-    : MenuItemList{&m_potMenuItemLabelStr, Array<MenuItemBase*>{m_topItems, 2}},
+    : MenuItemList{&m_potMenuItemLabelStr, Array<MenuItemBase*>{m_topItems, 1}},
       m_pot{pot},
       m_potNum{potNum},
-      m_initialized{true},
-      m_trigLevel{m_pot->getSensor()}
+      m_initialized{true}
+      /* m_trigLevel{m_pot->getSensor()} */
   {
     ASSERT(m_pot != nullptr, "m_pot may not be null!");
 
@@ -86,43 +86,44 @@ private:
 
   /************************ Sensor menu ************************/
 
-  PotSensorTrigLevelItem m_trigLevel{};
+  /* PotSensorTrigLevelItem m_trigLevel{}; */
 
-  static char const m_sensorMaxValLabel[LCD_COLS] PROGMEM;
-  ProgMemString m_sensorMaxValLabelStr{m_sensorMaxValLabel, sizeof(m_sensorMaxValLabel)};
-  MenuItemText m_sensorMaxVal{&m_sensorMaxValLabelStr};
+  /* static char const m_sensorMaxValLabel[LCD_COLS] PROGMEM; */
+  /* ProgMemString m_sensorMaxValLabelStr{m_sensorMaxValLabel, sizeof(m_sensorMaxValLabel)}; */
+  /* MenuItemText m_sensorMaxVal{&m_sensorMaxValLabelStr}; */
 
-  static char const m_sensorMinValLabel[LCD_COLS] PROGMEM;
-  ProgMemString m_sensorMinValLabelStr{m_sensorMinValLabel, sizeof(m_sensorMinValLabel)};
-  MenuItemText m_sensorMinVal{&m_sensorMinValLabelStr};
+  /* static char const m_sensorMinValLabel[LCD_COLS] PROGMEM; */
+  /* ProgMemString m_sensorMinValLabelStr{m_sensorMinValLabel, sizeof(m_sensorMinValLabel)}; */
+  /* MenuItemText m_sensorMinVal{&m_sensorMinValLabelStr}; */
 
-  MenuItemBase* m_sensorItems[3] = {
-    dynamic_cast<MenuItemBase*>(&m_trigLevel),
-    dynamic_cast<MenuItemBase*>(&m_sensorMaxVal),
-    dynamic_cast<MenuItemBase*>(&m_sensorMinVal)
-  };
+  /* MenuItemBase* m_sensorItems[3] = { */
+  /*   dynamic_cast<MenuItemBase*>(&m_trigLevel), */
+  /*   dynamic_cast<MenuItemBase*>(&m_sensorMaxVal), */
+  /*   dynamic_cast<MenuItemBase*>(&m_sensorMinVal) */
+  /* }; */
 
-  static char const m_sensorMenuLabel[LCD_COLS] PROGMEM;
-  ProgMemString m_sensorMenuLabelStr{m_sensorMenuLabel, sizeof(m_sensorMenuLabel)};
-  MenuItemList m_sensorMenu{&m_sensorMenuLabelStr, Array<MenuItemBase*>{m_sensorItems, 3}};
+  /* static char const m_sensorMenuLabel[LCD_COLS] PROGMEM; */
+  /* ProgMemString m_sensorMenuLabelStr{m_sensorMenuLabel, sizeof(m_sensorMenuLabel)}; */
+  /* MenuItemList m_sensorMenu{&m_sensorMenuLabelStr, Array<MenuItemBase*>{m_sensorItems, 3}}; */
 
   /************************ Motor menu ************************/
 
-  // char m_motorRunTimeLabel[LCD_COLS] = "Run time: %d";
-  // MenuItemText m_motorRunTime{m_motorRunTimeLabel};
+  /* char m_motorRunTimeLabel[LCD_COLS] = "Run time: %d"; */
+  /* MenuItemText m_motorRunTime{m_motorRunTimeLabel}; */
 
-  // MenuItemBase* m_motorItems[1] = {
-  //   dynamic_cast<MenuItemBase*>(&m_motorRunTime)
-  // };
+  /* MenuItemBase* m_motorItems[1] = { */
+  /*   dynamic_cast<MenuItemBase*>(&m_motorRunTime) */
+  /* }; */
 
-  // char m_motorMenuLabel[LCD_COLS] = "Motor";
-  // MenuItemList m_motorMenu{m_motorMenuLabel, Array<MenuItemBase*>{m_motorItems, 1}};
+  /* char m_motorMenuLabel[LCD_COLS] = "Motor"; */
+  /* MenuItemList m_motorMenu{m_motorMenuLabel, Array<MenuItemBase*>{m_motorItems, 1}}; */
 
   /************************ Top menu ************************/
 
-  MenuItemBase* m_topItems[2] = {
-    dynamic_cast<MenuItemBase*>(&m_sensorMenu),
-    dynamic_cast<MenuItemBase*>(&m_sensorMinVal)
+  MenuItemBase* m_topItems[1] = {
+    /* dynamic_cast<MenuItemBase*>(&m_sensorMenu), */
+    dynamic_cast<MenuItemBase*>(m_pot->getSensor())
+    /* dynamic_cast<MenuItemBase*>(&m_sensorMinVal) */
     // dynamic_cast<MenuItemBase*>(&m_motorMenu)
   };
 
@@ -130,9 +131,9 @@ private:
   RamString m_potMenuItemLabelStr{m_potMenuItemLabel, LCD_COLS};
 };
 
-char const PotMenu::m_sensorMaxValLabel[LCD_COLS] PROGMEM = "Max val: %d";
-char const PotMenu::m_sensorMinValLabel[LCD_COLS] PROGMEM = "Min val: %d";
-char const PotMenu::m_sensorMenuLabel[LCD_COLS] PROGMEM = "Sensor";
+/* char const PotMenu::m_sensorMaxValLabel[LCD_COLS] PROGMEM = "Max val: %d"; */
+/* char const PotMenu::m_sensorMinValLabel[LCD_COLS] PROGMEM = "Min val: %d"; */
+/* char const PotMenu::m_sensorMenuLabel[LCD_COLS] PROGMEM = "Sensor"; */
 
 
 /*******************************************************************************

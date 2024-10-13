@@ -14,6 +14,9 @@ namespace MenuLib
 class MenuItemList : public MenuItemBase
 {
 public:
+  // TODO: Change argument type of items to "Array<MenuItemBase>". Now the Array holds
+  // "MenuItemBase**" types. Perhaps changing the Array implementation to hold type 'T' instead of
+  // 'T*' is better?
   MenuItemList(IString* textLabel, Array<MenuItemBase*> items, bool useUpDownIndicators = false)
     : m_items{items},
       m_textLabel{textLabel},

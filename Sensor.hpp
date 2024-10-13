@@ -5,37 +5,22 @@
 #include "Filter.hpp"
 #include "CommonUtil.hpp"
 
-class ISensor
+#include "MenuLib/MenuItemList.hpp"
+#include "MenuLib/MenuItemEditField.hpp"
+#include "MenuLib/MenuItemText.hpp"
+#include "MenuLib/String.hpp"
+
+using MenuLib::MenuItemList;
+using MenuLib::MenuItemEditField;
+using MenuLib::MenuItemText;
+using MenuLib::IString;
+using MenuLib::ProgMemString;
+
+class Sensor : public MenuItemList
 {
 public:
-  static constexpr unsigned m_analogReadMaxValue = 1024;
-
-  ISensor() = default;
-  virtual ~ISensor() = default;
-
-  virtual void sample() = 0;
-
-  virtual bool isTriggered() const = 0;
-  bool isInitialized() const { return m_initialized; }
-
-  virtual unsigned getPercentageValue() const = 0;
-  virtual unsigned getRawValue() const = 0;
-
-  virtual uint8_t getTriggerThreshold() const = 0;
-  virtual void setTriggerThreshold(uint8_t threshold) = 0;
-
-  virtual unsigned getMinValue() const = 0;
-  virtual unsigned getMaxValue() const = 0;
-  virtual void setMinMaxValues(unsigned minValue, unsigned maxValue) = 0;
-
-protected:
-  bool m_initialized{false};
-};
-
-class ResistiveMoistureSensor : public ISensor
-{
-public:
-  ResistiveMoistureSensor() :
+  Sensor() :
+    MenuItemList{&m_menuLabelStr, m_topMenuItemsArr},
     m_dataPin{},
     m_powerPin{},
     m_minSensorRange{},
@@ -45,13 +30,14 @@ public:
     m_filter{}
   {}
 
-  ResistiveMoistureSensor(uint8_t dataPin,
-                          uint8_t powerPin,
-                          unsigned minSensorRange,
-                          unsigned maxSensorRange,
-                          uint8_t lowerTriggerThresholdPercent,
-                          bool invertTrigger = false,
-                          double filterAlpha = 0.8) :
+  Sensor(uint8_t dataPin,
+         uint8_t powerPin,
+         unsigned minSensorRange,
+         unsigned maxSensorRange,
+         uint8_t lowerTriggerThresholdPercent,
+         bool invertTrigger = false,
+         double filterAlpha = 0.8) :
+    MenuItemList{&m_menuLabelStr, m_topMenuItemsArr},
     m_dataPin{dataPin},
     m_powerPin{powerPin},
     m_minSensorRange{minSensorRange},
@@ -77,10 +63,10 @@ public:
     pinMode(m_dataPin, INPUT);
 #endif
 
-    m_initialized = true;
+    m_initializedSensor = true;
   }
 
-  void sample() override
+  void sample()
   {
     ASSERT(isInitialized(), "Sensor not initialized!");
 
@@ -99,7 +85,7 @@ public:
 #endif
   }
 
-  bool isTriggered() const override
+  bool isTriggered() const
   {
     ASSERT(isInitialized(), "Sensor not initialized!");
     unsigned sensorValue = getPercentageValue();
@@ -110,7 +96,7 @@ public:
       return sensorValue < m_lowerTriggerThresholdPercent;
   }
 
-  unsigned getPercentageValue() const override
+  unsigned getPercentageValue() const
   {
     ASSERT(isInitialized(), "Sensor not initialized!");
     unsigned boundedValue = constrain(m_filter.getValue(),
@@ -120,18 +106,18 @@ public:
     return map(boundedValue, m_minSensorRange, m_maxSensorRange, 0, 100);
   }
 
-  unsigned getRawValue() const override
+  unsigned getRawValue() const
   {
     ASSERT(isInitialized(), "Sensor not initialized!");
     return m_filter.getValue();
   }
 
-  virtual uint8_t getTriggerThreshold() const override
+  virtual uint8_t getTriggerThreshold() const
   {
     return m_lowerTriggerThresholdPercent;
   }
 
-  void setTriggerThreshold(uint8_t threshold) override
+  void setTriggerThreshold(uint8_t threshold)
   {
     ASSERT(isInitialized(), "Sensor not initialized!");
     ASSERT(0 < threshold && threshold < 100, "Threshold must be in the interval 0 < threshold < 100");
@@ -139,17 +125,17 @@ public:
     m_lowerTriggerThresholdPercent = threshold;
   }
 
-  virtual unsigned getMinValue() const override
+  virtual unsigned getMinValue() const
   {
     return m_minSensorRange;
   }
 
-  virtual unsigned getMaxValue() const override
+  virtual unsigned getMaxValue() const
   {
     return m_maxSensorRange;
   }
 
-  void setMinMaxValues(unsigned minValue, unsigned maxValue) override
+  void setMinMaxValues(unsigned minValue, unsigned maxValue)
   {
     ASSERT(isInitialized(), "Sensor not initialized!");
     ASSERT(minValue < m_analogReadMaxValue && maxValue < m_analogReadMaxValue,
@@ -169,6 +155,59 @@ private:
   uint8_t m_lowerTriggerThresholdPercent;
   bool m_invertTrigger;
   LowPassFilter<unsigned> m_filter;
+  bool m_initializedSensor{false};
+
+/*******************************************************************************
+ ***                            GUI logic and storage                         ***
+ *******************************************************************************/
+
+public:
+
+private:
+
+  /************************ Trigger threshold ************************/
+
+  static constexpr uint8_t m_threshStep = 10;
+  static constexpr uint8_t m_threshMinVal = 10;
+  static constexpr uint8_t m_threshMaxVal = 90;
+
+  static char const m_trigThreshFormat[LCD_COLS] PROGMEM;
+  ProgMemString m_trigThreshFormatStr{m_trigThreshFormat, sizeof(m_trigThreshFormat)};
+
+  MenuItemEditField m_trigThreshMenuItem{
+    &m_trigThreshFormatStr,
+    &m_lowerTriggerThresholdPercent,
+    m_threshStep, m_threshMinVal, m_threshMaxVal
+  };
+
+  /************************ Max/Min values ************************/
+
+  static char const m_sensorMaxValLabel[LCD_COLS] PROGMEM;
+  ProgMemString m_sensorMaxValLabelStr{m_sensorMaxValLabel, sizeof(m_sensorMaxValLabel)};
+  MenuItemText m_sensorMaxVal{&m_sensorMaxValLabelStr};
+
+  static char const m_sensorMinValLabel[LCD_COLS] PROGMEM;
+  ProgMemString m_sensorMinValLabelStr{m_sensorMinValLabel, sizeof(m_sensorMinValLabel)};
+  MenuItemText m_sensorMinVal{&m_sensorMinValLabelStr};
+
+  /************************ Top menu ************************/
+
+  MenuItemBase* m_topMenuItems[3] = {
+    dynamic_cast<MenuItemBase*>(&m_trigThreshMenuItem),
+    dynamic_cast<MenuItemBase*>(&m_sensorMaxVal),
+    dynamic_cast<MenuItemBase*>(&m_sensorMinVal),
+  };
+  Array<MenuItemBase*> m_topMenuItemsArr{m_topMenuItems, 3};
+
+  static char const m_menuLabel[LCD_COLS] PROGMEM;
+  ProgMemString m_menuLabelStr{m_menuLabel, sizeof(m_menuLabel)};
 };
+
+char const Sensor::m_trigThreshFormat[LCD_COLS] PROGMEM = "Trig level: %d%%";
+
+char const Sensor::m_sensorMaxValLabel[LCD_COLS] PROGMEM = "Max val: %d";
+char const Sensor::m_sensorMinValLabel[LCD_COLS] PROGMEM = "Min val: %d";
+
+char const Sensor::m_menuLabel[LCD_COLS] PROGMEM = "Sensor";
 
 #endif

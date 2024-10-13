@@ -32,6 +32,9 @@ public:
   virtual void update() {}
 
   virtual void draw(DisplayAdapter& display) {}
+
+  // TODO: Implement here and hold the label pointer in the base class? Identical funciton in almost
+  // all children
   virtual IString const* getTextLabel() const = 0;
 
   MenuItemBase* getParent() const
@@ -48,6 +51,8 @@ protected:
   MenuItemBase* m_parent{nullptr};
   MenuItemBase* m_child{nullptr};
   bool m_initialized{false};
+
+private:
 };
 
 }
