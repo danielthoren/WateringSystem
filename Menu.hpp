@@ -27,7 +27,9 @@ public:
   {
     ASSERT(pSensor != nullptr, "pSensor may not be null");
     m_pSensor = pSensor;
-    m_trigLevelItem = MenuItemEditField{&m_trigLevelformatStr, &m_pSensor->m_triggerThresh, trigStep, trigMinVal, trigMaxVal};
+    m_trigLevelItem = MenuItemEditField<uint8_t>{&m_trigLevelformatStr, &m_pSensor->m_triggerThresh, trigStep, trigMinVal, trigMaxVal};
+    m_maxValSetManual =
+      MenuItemEditField<unsigned>{&m_maxMinSetManualStr, &m_pSensor->m_maxSensorRange, maxMinStep, 0, Sensor::m_analogReadMaxValue};
   }
 
 private:
@@ -41,12 +43,27 @@ private:
   static constexpr uint8_t trigMinVal = 10;
   static constexpr uint8_t trigMaxVal = 90;
 
-  MenuItemEditField m_trigLevelItem{&m_trigLevelformatStr, nullptr, trigStep, trigMinVal, trigMaxVal};
+  MenuItemEditField<uint8_t> m_trigLevelItem{&m_trigLevelformatStr, nullptr, trigStep, trigMinVal, trigMaxVal};
 
   /************************ Max value ************************/
+
+  static char const m_maxMinSetManual[LCD_COLS] PROGMEM;
+  ProgMemString m_maxMinSetManualStr{m_maxMinSetManual, sizeof(m_maxMinSetManual)};
+  static constexpr uint8_t maxMinStep = 50;
+
+  static char const m_maxMinSetCurr[LCD_COLS] PROGMEM;
+  ProgMemString m_maxMinSetCurrStr{m_maxMinSetCurr, sizeof(m_maxMinSetCurr)};
+
+  MenuItemEditField<unsigned> m_maxValSetManual{&m_maxMinSetManualStr, nullptr, maxMinStep, 0, Sensor::m_analogReadMaxValue};
+
+  MenuItemBase* m_maxItems[1] = {
+    dynamic_cast<MenuItemBase*>(&m_maxValSetManual)
+  };
+  Array<MenuItemBase*> m_maxItemsArr{m_maxItems, sizeof(m_maxItems) / sizeof(MenuItemBase*)};
+
   static char const m_sensorMaxValLabel[LCD_COLS] PROGMEM;
   ProgMemString m_sensorMaxValLabelStr{m_sensorMaxValLabel, sizeof(m_sensorMaxValLabel)};
-  MenuItemText m_sensorMaxVal{&m_sensorMaxValLabelStr};
+  MenuItemList m_sensorMaxVal{&m_sensorMaxValLabelStr, m_maxItemsArr};
 
   /************************ Min value ************************/
   static char const m_sensorMinValLabel[LCD_COLS] PROGMEM;
@@ -68,6 +85,9 @@ private:
 
 char const SensorMenu::m_trigLevelformat[LCD_COLS] PROGMEM = "Trig level: %d%%";
 
+
+char const SensorMenu::m_maxMinSetManual[LCD_COLS] PROGMEM = "Set manual:%d";
+char const SensorMenu::m_maxMinSetCurr[LCD_COLS] PROGMEM   = "Set curr:  %d";
 char const SensorMenu::m_sensorMaxValLabel[LCD_COLS] PROGMEM = "Max val: %d";
 char const SensorMenu::m_sensorMinValLabel[LCD_COLS] PROGMEM = "Min val: %d";
 

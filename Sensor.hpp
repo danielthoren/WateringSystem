@@ -146,7 +146,7 @@ private:
   uint8_t m_dataPin;
   uint8_t m_powerPin;
   unsigned m_minSensorRange;
-  unsigned m_maxSensorRange;
+  unsigned m_maxSensorRange; // TODO: Change to uint16 to save ram
   uint8_t m_triggerThresh;
   bool m_invertTrigger;
   LowPassFilter<unsigned> m_filter;

@@ -8,14 +8,15 @@
 namespace MenuLib
 {
 
+template<typename T>
 class MenuItemEditField : public MenuItemBase
 {
 public:
   MenuItemEditField(IString const* pFormatStr,
-					uint8_t* pValue,
-					uint8_t stepSize,
-					uint8_t minVal,
-					uint8_t maxVal)
+					T* pValue,
+					T stepSize,
+					T minVal,
+					T maxVal)
     : m_pFormatStr{pFormatStr},
       m_labelStr{m_label, LCD_COLS},
 	  m_pValue{pValue},
@@ -37,7 +38,10 @@ public:
     switch (event)
     {
       case(InputEvent::Down):
-        *m_pValue = max(*m_pValue - m_stepSize, m_minVal);
+        if (*m_pValue - m_stepSize > m_maxVal)
+          *m_pValue = 0;
+        else
+          *m_pValue = max(*m_pValue - m_stepSize, m_minVal);
         break;
       case(InputEvent::Up):
         *m_pValue = min(*m_pValue + m_stepSize, m_maxVal);
@@ -75,10 +79,10 @@ protected:
   char m_label[LCD_COLS];
   RamString m_labelStr;
 
-  uint8_t* m_pValue{nullptr};
-  uint8_t m_stepSize;
-  uint8_t m_minVal;
-  uint8_t m_maxVal;
+  T* m_pValue{nullptr};
+  T m_stepSize;
+  T m_minVal;
+  T m_maxVal;
 };
 
 }
